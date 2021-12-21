@@ -1,0 +1,14 @@
+<mat-toolbar class="footer">
+    <span class="cfp-shall" *ngIf="shallValue!=0">
+        <span class="cfp-label">Comprometido</span>
+        <span class="cfp-value">{{shallValue | number : '1.2-2'}}</span>
+    </span>
+    <span class="cfp-balance">
+        <span class="cfp-label">Saldo no mês</span>
+        <span class="cfp-value">{{balanceValue | number : '1.2-2'}}</span>
+    </span>
+    <span class="cfp-balance">
+        <span class="cfp-label">Saldo final</span>
+        <span class="cfp-value">{{finalBalanceValue | number : '1.2-2'}}</span>
+    </span>
+</mat-toolbar>

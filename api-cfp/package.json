@@ -1,0 +1,54 @@
+{
+  "name": "api-cfp",
+  "version": "1.0.2",
+  "description": "API-CFP: back-end do Controle Financeiro Pessoal",
+  "main": "server.js",
+  "scripts": {
+    "prestart": "env-cmd -f ./config/.env.prod node src/database/dbload.js",
+    "start": "env-cmd -f ./config/.env.prod node src/server.js",
+    "predev": "env-cmd -f ./config/.env.dev node src/database/dbload.js",
+    "dev": "env-cmd -f ./config/.env.dev node src/server.js",
+    "predev-mon": "env-cmd -f ./config/.env.dev node src/database/dbload.js",
+    "dev-mon": "env-cmd -f ./config/.env.dev nodemon src/server.js",
+    "pretest": "env-cmd -f ./config/.env.test node src/database/dbload.js",
+    "pretestc": "env-cmd -f ./config/.env.test node src/database/dbload.js",
+    "pretesto": "env-cmd -f ./config/.env.test node src/database/dbload.js",
+    "pretestw": "env-cmd -f ./config/.env.test node src/database/dbload.js",
+    "test": "env-cmd -f ./config/.env.test jest --runInBand",
+    "testc": "env-cmd -f ./config/.env.test jest --coverage --runInBand",
+    "testo": "env-cmd -f ./config/.env.test jest --detectOpenHandles --runInBand",
+    "testw": "env-cmd -f ./config/.env.test jest --watchAll --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abmelorj/cfp.git"
+  },
+  "keywords": [
+    "CFP",
+    "Controle",
+    "Financeiro",
+    "Pessoal"
+  ],
+  "author": "Anderson Berlim Melo",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/abmelorj/cfp/issues"
+  },
+  "homepage": "https://github.com/abmelorj/cfp#readme",
+  "devDependencies": {
+    "jest": "^27.2.5",
+    "nodemon": "^2.0.14",
+    "supertest": "^6.1.6"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "env-cmd": "^10.1.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mariadb": "^2.5.4",
+    "morgan": "^1.10.0",
+    "sequelize": "^6.7.0",
+    "winston": "^3.3.3"
+  }
+}

@@ -1,0 +1,81 @@
+/* reset.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+body {
+    font-family: "Open Sans", sans-serif;
+}
+
+ul, ol, li {
+    list-style: none;
+}
+
+/* You can add global styles to this file, and also import other style files */
+
+html, body {
+    height: 100%;
+    background-color: white;
+}
+
+body {
+    margin: 0;
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.red {
+    color: rgb(227, 94, 107);
+}
+
+.blue {
+    color: rgb(61, 128, 222);
+}
+
+.folder-color {
+    color: peru;
+}
+
+.v-middle {
+    vertical-align: middle;
+}
+
+.cfp-list-item-line {
+    display: flex;
+    flex-direction: row;
+    height: auto;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 6px;
+    font-size: 1em;
+    /* background-color: aquamarine; */
+}
+
+.mat-button-base {
+    margin: 8px 8px 8px 8px;
+    width: 8rem;
+    font-size: 1rem;
+}
+
+/* .msg-success {
+
+} */
+
+/* .button:hover {
+    transition-duration: 0.1s;
+    background-color: #6f6f6f;
+}
+
+.button {
+    background-color: #ffffff00;
+} */
+
+
+
+app-list-item:active {
+    background-color: lightgray;
+    transition: .2s;
+}

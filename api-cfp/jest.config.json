@@ -1,0 +1,12 @@
+{
+    "roots": [
+        "src"
+    ],
+    "collectCoverageFrom": [
+        "**/*.js",
+        "!src/server.js",
+        "!**/node_modules/**",
+        "!**/coverage/**"
+    ],
+    "testSequencer": "./src/config/testSequencer.js"
+}

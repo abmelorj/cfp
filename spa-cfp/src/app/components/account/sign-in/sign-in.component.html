@@ -1,0 +1,21 @@
+<form (ngSubmit)="onSubmit()" #form="ngForm" class="sign-form">
+    <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput placeholder="Ex: seulogin@provedor.com.br" class="form-control" type="email" name="email"
+            id="email" [(ngModel)]="login.email" required />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input matInput placeholder="Senha no Controle Financeiro Pessoal" class="form-control" type="password"
+            name="password" id="password" [(ngModel)]="login.password" required />
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit" class="btn btn-primary btn-block"
+        [disabled]="form.form.invalid">ENTRAR</button>
+    <p class="separator">____________________________________</p>
+    <button mat-raised-button color="primary" type="button" class="btn btn-link btn-block" [routerLink]="['/reset']"
+        [disabled]="!login.email.includes('@')">Esqueci a senha</button>
+    <p class="text">Um link será enviado para o endereço de email cadastrado para redefinição da senha.</p>
+    <p class="separator">____________________________________</p>
+    <button mat-raised-button color="primary" type="button" class="btn btn-link btn-block"
+        [routerLink]="['/signingoogle']" [disabled]="true">Entrar com Google</button>
+</form>

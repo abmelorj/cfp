@@ -1,0 +1,15 @@
+<form (ngSubmit)="updateAccount()" #form="ngForm" class="form">
+    <mat-form-field appearance="outline">
+        <mat-label>Nome da conta</mat-label>
+        <input matInput [placeholder]="placeHolderText" class="form-control" type="text" name="name" id="name"
+            [ngModel]="account.name" required (ngModelChange)="nameChange($event)" />
+    </mat-form-field>
+    <div>
+        <button #delete mat-raised-button color="primary" type="button" class="btn btn-block"
+            [disabled]="form.form.invalid || isNameChanged" (click)="deleteAccount()">EXCLUIR</button>
+        <button #update mat-raised-button color="primary" type="submit" class="btn btn-primary btn-block"
+            [disabled]="form.form.invalid || !isNameChanged">ALTERAR</button>
+    </div>
+    <p class="text"><b>Nota:</b> conta que já teve movimentação não pode ser excluída, apenas
+        desativada após estar com saldo final zerado.</p>
+</form>

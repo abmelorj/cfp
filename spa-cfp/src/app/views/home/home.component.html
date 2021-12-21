@@ -1,0 +1,74 @@
+<app-header></app-header>
+<mat-sidenav-container class="container">
+    <mat-sidenav #cfpSideNav (click)="cfpSideNav.toggle()" class="sidenav" mode="over" fixedInViewport="true"
+        fixedTopGap="64">
+        <mat-nav-list>
+            <a mat-list-item class="nav-list" routerLink="category" (click)="cfpService.setCategoryTabIndex(0)">
+                <i class="material-icons">
+                    savings
+                </i>
+                Reserva financeira
+            </a>
+            <a mat-list-item class="nav-list" routerLink="category" (click)="cfpService.setCategoryTabIndex(1)">
+                <i class="material-icons">
+                    money
+                </i>
+                Recurso financeiro
+            </a>
+            <a mat-list-item>
+                <!-- TODO -->
+                <i class="material-icons">
+                    credit_card
+                </i>
+                Fatura cartão de crédito
+            </a>
+            <a mat-list-item>
+                <!-- TODO: routerLink="shalls" -->
+                <i class="material-icons">
+                    payments
+                </i>
+                Pagamentos agendados
+            </a>
+            <a mat-list-item>
+                <!-- TODO: routerLink="profile" -->
+                <i class="material-icons">
+                    folder_open
+                </i>
+                Cadastro
+            </a>
+            <a mat-list-item routerLink="access-grant">
+                <i class="material-icons">
+                    lock
+                </i>
+                Gerenciar acesso
+            </a>
+            <a mat-list-item routerLink="access-grant/open">
+                <i class="material-icons">
+                    leak_add
+                </i>
+                Acessar controle financeiro
+            </a>
+            <a mat-list-item>
+                <!-- TODO -->
+                <i class="material-icons">
+                    key
+                </i>
+                Alterar senha
+            </a>
+            <a mat-list-item (click)="signoff()">
+                <i class="material-icons">
+                    logout
+                </i>
+                Sair
+            </a>
+        </mat-nav-list>
+        <div class="bottom">
+            <p class="field">ID: {{cfpService.owner.id| number : '6.0-0' }}</p>
+            <p class="field">{{cfpService.owner.email}}</p>
+        </div>
+    </mat-sidenav>
+    <mat-sidenav-content class="content">
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+</mat-sidenav-container>
+<app-footer></app-footer>

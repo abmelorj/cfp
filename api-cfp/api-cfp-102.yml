@@ -1,0 +1,1888 @@
+openapi: 3.0.3
+
+info:
+  version: 1.0.2
+  title: API-CFP
+  description: >-
+    Esta API está sendo desenvolvida como parte do trabalho de conclusão do
+    curso de Pós-graduação Lato Sensu em Desenvolvimento Web Full Stack na
+    Pontifícia Universidade Católica de Minas Gerais.
+
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/abmelorj/api-cfp/1.0.2
+
+externalDocs:
+  description: Controle Financeiro Pessoal
+  url: https://github.com/abmelorj/cfp
+
+tags:
+  - name: accessrules
+    description: "Define os quatro papéis utilizados pelo controle de acesso suportados pelo sistema: proprietário, coautor, editor e auditor."
+  - name: operationtypes
+    description: "Define as sete operações controladas pelo sistema: receber crédito, reservar valor, transferir valor, transferir reserva, pagar à vista, pagar com cartão de crédito, agendar pagamento."
+  - name: accessgrants
+    description: "Cada pessoa registrada no sistema automaticamente recebe o acesso de proprietário do controle financeiro que criar. Este registro servirá para indicar quando começou a utilizar o controle financeiro pessoal. Nesta entidade o proprietário poderá registrar concessão e revogação de acesso para outras pessoas ao seu controle financeiro conforme os tipos pré-definidos em AccessRule."
+  - name: users
+    description: "Usuário cadastrado no sistema, armazena o hash da credencial e/ou token de acesso."
+  - name: categories
+    description: "Categorias criadas pelo proprietário ou coautor do controle financeiro para agrupar as contas de recurso financeiro (débito), reserva financeira (crédito) ou cartão de crédito para facilitar a navegação no controle financeiro."
+  - name: accounts
+    description: "Representa todas as contas criadas pelo proprietário ou coautor de determinado controle financeiro, que podem ser de 3 tipos: recurso financeiro (débito), reserva financeira (crédito) ou cartão de crédito"
+  - name: operations
+    description: "Operação representa as operações financeiras essenciais do sistema que além do registro em Operation afetam as entidades Balance e/ou Shall."
+  - name: shalls
+    description: "Obrigação pendente de pagamento é gerada a partir das operações de pagamento com cartão de crédito ou de agendamento de pagamento."
+  - name: payments
+    description: "Pagamento é o registro da associação da conta de recurso financeiro (conta de débito) utilizada para liquidação de uma ou mais despesas em contas de reserva financeira ou conta de cartão de crédito em um pagamento único."
+  - name: balances
+    description: "Saldo disponível em cada conta mês a mês a partir do mês da data de referência do primeiro registro financeiro na conta."
+  - name: payshalls
+    description: "Pagamento/Obrigação é o registro associativo que identifica uma ou mais obrigações liquidadas por um pagamento único utilizando valor existente em conta de recurso financeiro (conta de débito)."
+#----------------------------------------------------------#
+#  P A T H S                                               #
+#----------------------------------------------------------#
+paths:
+  # AccessRule --------------------------------------------
+  /api/accessrules:
+    get:
+      tags:
+        - accessrules
+      summary: Lista perfis de acesso
+      description: Retorna array com a relação dos perfis de acesso predefinidos e válidos no sistema.
+      operationId: listAccessRules
+      responses:
+        200:
+          description: Lista de perfis de acesso.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccessRule"
+        404:
+          description: "Erro: Perfis de acesso não foram carregados."
+          content: {}
+
+  /api/accessrules/{id}:
+    get:
+      tags:
+        - accessrules
+      summary: Obtém perfil de acesso
+      description: Retorna o perfil de acesso associado ao identificador fornecido.
+      operationId: getAccessRuleById
+      parameters:
+        - name: id
+          in: path
+          description: ID do perfil de acesso
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Perfil de acesso selecionado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessRule"
+        404:
+          description: Perfil de acesso não localizado
+          content: {}
+
+  # OperationType -----------------------------------------
+  /api/operationtypes:
+    get:
+      tags:
+        - operationtypes
+      summary: Lista tipos de operação
+      description: Retorna array com a relação dos tipos de operação predefinidos e válidos no sistema.
+      operationId: listOperationTypes
+      responses:
+        200:
+          description: Lista de tipos de operação.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OperationType"
+        404:
+          description: "Erro: tipos de operação não foram carregados."
+          content: {}
+
+  /api/operationtypes/{id}:
+    get:
+      tags:
+        - operationtypes
+      summary: Obtém tipo de operação
+      description: Retorna o tipo de operação associado ao identificador fornecido.
+      operationId: getOperationTypeById
+      parameters:
+        - name: id
+          in: path
+          description: ID do tipo de operação
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Tipo de operação selecionado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperationType"
+        404:
+          description: Tipo de operação não localizado
+          content: {}
+
+  # AccessGrant -------------------------------------------
+  /api/accessgrants:
+    post:
+      tags:
+        - accessgrants
+      summary: Registra concessão de acesso
+      description: Registra concessão de acesso ao controle financeiro pessoal.
+      operationId: grantAccess
+      responses:
+        201:
+          description: "MSG019: Acesso concedido com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessGrant"
+        403:
+          description: "Acesso negado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        409:
+          description: "Erro: Acesso já concedido."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/AccessGrant"
+
+  /api/accessgrants/{id}:
+    delete:
+      tags:
+        - accessgrants
+      summary: Revoga o acesso concedido
+      description: Revoga o acesso identificado na data corrente.
+      operationId: revokeAccess
+      parameters:
+        - name: id
+          in: path
+          description: ID do acesso a ser revogado
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "MSG021: Acesso revogado com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessGrant"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Acesso não identificado ou inválido"
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/accessgrants/{id}/grants:
+    get:
+      tags:
+        - accessgrants
+      summary: Lista os acessos concedidos pelo proprietário
+      description: Retorna array com a relação de acessos concedidos pelo proprietário identificado.
+      operationId: listAccessGrantedByOwnerId
+      parameters:
+        - name: id
+          in: path
+          description: ID do proprietário do plano de contas
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Lista de acessos concedidos pelo proprietário.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccessGrant"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Proprietário não identificado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/accessgrants/{id}/granted:
+    get:
+      tags:
+        - accessgrants
+      summary: Lista os acessos recebidos
+      description: Retorna array com a relação de acessos concedidos ao usuário identificado.
+      operationId: listAccessGrantedByUserId
+      parameters:
+        - name: id
+          in: path
+          description: ID do usuário que recebeu acesso ao plano de contas
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Lista de acessos concedidos ao usuário.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccessGrant"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Usuário não localizado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  # Auth --------------------------------------------------
+  /auth/signup:
+    post:
+      tags:
+        - users
+      summary: Registra usuário
+      description: Registra usuário no controle financeiro pessoal.
+      operationId: userSignup
+      responses:
+        201:
+          description: "MSG001: Registro no Controle Financeiro Pessoal criado com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserOut"
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        409:
+          description: "Erro: Usuário já registrado."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/UserIn"
+
+  /auth/signin:
+    post:
+      tags:
+        - users
+      summary: Autentica usuário
+      description: Autentica usuário no controle financeiro pessoal.
+      operationId: userSignin
+      responses:
+        201:
+          description: "Usuário autenticado com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserOut"
+        404:
+          description: "Erro: Acesso não autorizado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/User"
+
+  /auth/Validate:
+    post:
+      tags:
+        - users
+      summary: Autentica usuário
+      description: Autentica usuário no controle financeiro pessoal.
+      operationId: userSignin
+      responses:
+        200:
+          description: "Token verificado."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserOut"
+        404:
+          description: "Erro: Token inválido."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/UserToken"
+
+  /api/signout:
+    post:
+      tags:
+        - users
+      summary: Desconecta o usuário
+      description: Desconecta o usuário do sistema.
+      operationId: userSignout
+      parameters:
+        - name: email
+          in: query
+          description: Endereço de email do usuário
+          required: true
+          schema:
+            type: string
+            format: email
+            example: fulano@gmail.com
+      responses:
+        200:
+          description: "Usuário desconectado com sucesso."
+          content: {}
+        404:
+          description: "Erro: Não sessão ativa para ser deconectada."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/UserToken"
+
+  # User --------------------------------------------------
+  /api/users/{id}:
+    get:
+      tags:
+        - users
+      summary: Obtém registro do usuário
+      description: Retorna o registro do usuário associado ao identificador fornecido.
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          description: ID do usuário
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Usuário localizado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        404:
+          description: Usuário não localizado
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+    put:
+      tags:
+        - users
+      summary: Atualiza registro do usuário
+      description: Atualiza o registro do usuário associado ao identificador fornecido.
+      operationId: updateUserById
+      parameters:
+        - name: id
+          in: path
+          description: ID do usuário
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "MSG002: Dados alterados com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Usuário não localizado"
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/User"
+
+    delete:
+      tags:
+        - users
+      summary: Exclui usuário do sistema
+      description: Exclui o registro do usuário no controle financeiro pessoal e todos os seus registros. `Serviço não disponível.`
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          description: ID do usuário
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "Usuário excluído com sucesso, incluindo todos os dados do respectivo registro financeiro."
+          content: {}
+        404:
+          description: "Erro: Usuário não identificado ou inválido"
+          content: {}
+      deprecated: true
+
+  # Category ----------------------------------------------
+  /api/categories:
+    post:
+      tags:
+        - categories
+      summary: Cadastra categoria
+      operationId: addCategory
+      responses:
+        200:
+          description: "Categoria reativada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        201:
+          description: "MSG014: Inclusão de categoria efetuada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        403:
+          description: "Acesso negado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        409:
+          description: "Erro: Categoria já registrada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Category"
+
+    put:
+      tags:
+        - categories
+      summary: Atualiza categoria
+      operationId: updateCategory
+      responses:
+        200:
+          description: "MSG012: Alteração na categoria efetuada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Categoria não localizada."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        409:
+          description: "Erro: Categoria já registrada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Category"
+
+  /api/categories/{id}:
+    get:
+      tags:
+        - categories
+      summary: Obtém registro da categoria
+      operationId: getCategoryById
+      parameters:
+        - name: id
+          in: path
+          description: ID da categoria
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Categoria localizada.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Categoria não localizada."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+    delete:
+      tags:
+        - categories
+      summary: Exclui categoria
+      operationId: deleteCategory
+      parameters:
+        - name: id
+          in: path
+          description: ID da categoria
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "MSG013: Exclusão de categoria efetuada com sucesso."
+          content: {}
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Categoria não identificada ou inválida"
+          content: {}
+
+  /api/categories/owner/{id}:
+    get:
+      tags:
+        - categories
+      summary: Lista as categorias do usuário
+      operationId: listCategoryByOwnerId
+      parameters:
+        - name: id
+          in: path
+          description: ID do proprietário
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "Categorias do usuário."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Proprietário informado não localizado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/categories/{id}/accounts:
+    get:
+      tags:
+        - categories
+        - accounts
+      summary: Lista as contas por categoria
+      operationId: listAccountByCategoryId
+      parameters:
+        - name: id
+          in: path
+          description: ID da categoria
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "Contas da Categoria."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Registro não localizado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  # Account -----------------------------------------------
+  /api/accounts:
+    post:
+      tags:
+        - accounts
+      summary: Cadastra conta
+      operationId: addAccount
+      responses:
+        201:
+          description: "MSG017: Inclusão de conta efetuada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        403:
+          description: "Acesso negado."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        409:
+          description: "Erro: Conta já cadastrada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Account"
+
+    put:
+      tags:
+        - accounts
+      summary: Atualiza dados da conta
+      operationId: updateAccountById
+      responses:
+        200:
+          description: "MSG015: Alteração na conta efetuada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: Conta não localizada
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Account"
+
+  /api/accounts/{id}:
+    get:
+      tags:
+        - accounts
+      summary: Recupera dados da conta
+      operationId: getAccountById
+      parameters:
+        - name: id
+          in: path
+          description: ID da conta
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "Conta registrada pelo usuário."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não localizada."
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+    delete:
+      tags:
+        - accounts
+      summary: Exclui conta
+      operationId: deleteAccountById
+      parameters:
+        - name: id
+          in: path
+          description: ID da conta
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "MSG016: Exclusão de conta efetuada com sucesso."
+          content: {}
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não identificada ou inválida"
+          content: {}
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/accounts/owner/{id}:
+    get:
+      tags:
+        - accounts
+      summary: Lista contas por proprietário
+      operationId: listAccountByOwnerId
+      parameters:
+        - name: id
+          in: path
+          description: ID do proprietário
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: "Contas do usuário."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Proprietário não localizado."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/accounts/{id}/pendingValue:
+    get:
+      tags:
+        - accounts
+      summary: Obtém valor do saldo comprometido
+      operationId: getAccountPendingValue
+      parameters:
+        - name: id
+          in: path
+          description: ID da conta
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Saldo comprometido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/accounts/{id}/pendingValue/{yearMonth}:
+    get:
+      tags:
+        - accounts
+      summary: Obtém valor do saldo comprometido no mês
+      operationId: getAccountPendingValueByMonth
+      parameters:
+        - name: id
+          in: path
+          description: ID da conta
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: yearMonth
+          in: path
+          description: Ano/Mês no formato AAAAMM de referência
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Saldo comprometido no mês
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/accounts/{id}/operationsBy/{yearMonth}:
+    get:
+      tags:
+        - operations
+      summary: Recupera a lista de operações de uma conta no mês indicado
+      operationId: listAccountOperationByMonth
+      parameters:
+        - name: id
+          in: path
+          description: ID da conta
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: yearMonth
+          in: path
+          description: Ano/Mês no formato AAAAMM de referência
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Operações registradas para a conta no mês."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Operation"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não localizada ou sem movimento no mês."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  # Balance -----------------------------------------------
+  /api/accounts/{id}/balance:
+    get:
+      tags:
+        - accounts
+        - balances
+      summary: Obtém valor do saldo da conta
+      operationId: getAccountBalance
+      parameters:
+        - name: id
+          in: path
+          description: ID da conta
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Saldo da conta
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/accounts/{id}/balance/{yearMonth}:
+    get:
+      tags:
+        - accounts
+        - balances
+      summary: Obtém valor do saldo da conta no mês
+      operationId: getAccountBalanceByMonth
+      parameters:
+        - name: id
+          in: path
+          description: ID da conta
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: yearMonth
+          in: path
+          description: Ano/Mês no formato AAAAMM de referência
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Saldo da conta no mês
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  # Operation ---------------------------------------------
+  /api/operations/credit:
+    post:
+      tags:
+        - operations
+      summary: Registra operação de crédito de valor em conta de recurso financeiro
+      operationId: creditOperation
+      responses:
+        201:
+          description: "MSG018: Operação registrada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Operation"
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Operation"
+
+  /api/operations/reserv:
+    post:
+      tags:
+        - operations
+      summary: Registra operação de reserva de valor em conta de reserva financeira
+      operationId: reservOperation
+      responses:
+        201:
+          description: "MSG018: Operação registrada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Operation"
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Operation"
+
+  /api/operations/transfer:
+    post:
+      tags:
+        - operations
+      summary: Registra operação de transferência de valor entre contas de recurso financeiro ou de reserva financeira
+      operationId: transferOperation
+      responses:
+        201:
+          description: "MSG018: Operação registrada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Operation"
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Operation"
+
+  /api/operations/forecast:
+    post:
+      tags:
+        - operations
+      summary: Registra operação de agendamento de despesa ainda sem definição da conta de recurso financeiro que será usada na liquidação
+      operationId: forecastOperation
+      responses:
+        201:
+          description: "MSG018: Operação registrada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Operation"
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Operation"
+
+  /api/operations/pay:
+    post:
+      tags:
+        - operations
+      summary: Registra operação de pagamento à vista, agendado ou com cartão de crédito
+      operationId: payOperation
+      responses:
+        201:
+          description: "MSG018: Operação registrada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Operation"
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Operation"
+
+  /api/operations/{id}:
+    put:
+      tags:
+        - operations
+      summary: Atualiza dados de operação
+      operationId: updateOperationById
+      parameters:
+        - name: id
+          in: path
+          description: ID da operação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "MSG010: Alteração realizada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Operation"
+        404:
+          description: Operação não localizada
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Operation"
+
+    delete:
+      tags:
+        - operations
+      summary: Exclui operação
+      operationId: deleteOperationById
+      parameters:
+        - name: id
+          in: path
+          description: ID da operação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Operação excluída com sucesso."
+          content: {}
+        404:
+          description: "Erro: Operação não identificada ou inválida"
+          content: {}
+
+  /api/operations/{id}/shalls:
+    get:
+      tags:
+        - operations
+        - shalls
+      summary: Recupera obrigações pelo identificador da operação de origem
+      operationId: getShallByOperationId
+      parameters:
+        - name: id
+          in: path
+          description: ID da operação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Obrigações geradas pela operação."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Shall"
+        404:
+          description: "Erro: Operação não localizada."
+          content: {}
+
+  # Shall -------------------------------------------------
+  /api/shalls/{id}:
+    put:
+      tags:
+        - shalls
+      summary: Atualiza/ajusta dados da obrigação
+      operationId: updateShallById
+      parameters:
+        - name: id
+          in: path
+          description: ID da obrigação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "MSG010: Alteração realizada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shall"
+        404:
+          description: Obrigação não localizada
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Shall"
+
+    get:
+      tags:
+        - shalls
+      summary: Recupera dados da obrigação agendada
+      operationId: getShallById
+      parameters:
+        - name: id
+          in: path
+          description: ID da obrigação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Obrigação agendada."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Shall"
+        404:
+          description: "Erro: Obrigação não localizada."
+          content: {}
+
+  /api/shalls/{id}/payup:
+    put:
+      tags:
+        - shalls
+      summary: Realiza pagamento de obrigação agendada
+      operationId: payUpShallById
+      parameters:
+        - name: id
+          in: path
+          description: ID da obrigação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Pagamento realizado com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shall"
+        404:
+          description: Obrigação não localizada
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Shall"
+
+  /api/shalls/{id}/payment:
+    get:
+      tags:
+        - shalls
+      summary: Recupera registro do pagamento pelo identificador da obrigação
+      operationId: getPaymentByShallId
+      parameters:
+        - name: id
+          in: path
+          description: ID da obrigação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Pagamento registrado pelo usuário."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+        404:
+          description: "Erro: Obrigação não localizada."
+          content: {}
+
+  # Payment -----------------------------------------------
+  /api/payments/{id}:
+    get:
+      tags:
+        - payments
+      summary: Recupera dados de pagamento
+      operationId: getPaymentById
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Pagamento registrado pelo usuário."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+        404:
+          description: "Erro: Pagamento informado não foi localizado."
+          content: {}
+
+    put:
+      tags:
+        - payments
+      summary: Atualiza dados de pagamento
+      operationId: updatePayment
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "MSG010: Alteração realizada com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        404:
+          description: Pagamento não localizado
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Payment"
+
+    delete:
+      tags:
+        - payments
+      summary: Exclui pagamento
+      operationId: deletePayment
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "MSG011: Pagamento agendado excluído."
+          content: {}
+        404:
+          description: "Erro: Pagamento não identificado ou inválido"
+          content: {}
+
+  /api/payments:
+    post:
+      tags:
+        - payments
+        - payshalls
+      summary: Registra pagamento de obrigação agendada
+      operationId: addPayment
+      responses:
+        201:
+          description: "Pagamento registrado com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        405:
+          description: "Erro: Dados inválidos."
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Payment"
+
+  /api/payments/{id}/payup:
+    put:
+      tags:
+        - payments
+        - payshalls
+      summary: Liquida pagamento agendado
+      operationId: payupPayment
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Pagamento realizado com sucesso."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        404:
+          description: Pagamento não localizado
+          content: {}
+      requestBody:
+        $ref: "#/components/requestBodies/Payment"
+
+  /api/payments/{id}/shalls:
+    get:
+      tags:
+        - payments
+        - payshalls
+      summary: Recupera lista de obrigações relacionadas ao pagamento
+      operationId: listShallByPaymentId
+      parameters:
+        - name: id
+          in: path
+          description: ID do pagamento
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Obrigações vinculadas ao pagamento."
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Shall"
+        404:
+          description: "Erro: Pagamento não localizado."
+          content: {}
+
+components:
+  #--------------------------------------------------------#
+  #  S C H E M A S                                         #
+  #--------------------------------------------------------#
+  schemas:
+    # UserIn ----------------------------------------------
+    UserIn:
+      type: object
+      properties:
+        email:
+          description: Endereço de email do usuário
+          type: string
+          format: email
+          example: fulano@gmail.com
+        hash:
+          description: Hash da senha utilizada para autenticar o usuário
+          type: string
+          format: password
+    # UserOut ---------------------------------------------
+    UserOut:
+      type: object
+      properties:
+        id:
+          description: Identificador do usuário
+          type: integer
+          format: int32
+          example: 11111111
+        name:
+          description: Nome do usuário
+          type: string
+          example: Fulano da Silva
+        email:
+          description: Endereço de email do usuário
+          type: string
+          format: email
+          example: fulano@gmail.com
+        token:
+          description: Token de acesso
+          type: string
+          format: password
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+        valid:
+          description: Indicador de usuário autenticado/válido
+          type: boolean
+    # UserToken -------------------------------------------
+    UserToken:
+      type: object
+      properties:
+        token:
+          description: Token de acesso
+          type: string
+          format: password
+    # AccessRule ------------------------------------------
+    AccessRule:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Identificador do perfil de acesso
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+        name:
+          type: string
+          description: Nome do perfil de acesso
+          enum:
+            - Auditor
+            - Editor
+            - Coautor
+            - Proprietário
+        description:
+          type: string
+          description: Descrição do perfil de acesso
+    # OperationType ---------------------------------------
+    OperationType:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: Identificador do tipo de operação
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+            - 7
+        name:
+          type: string
+          description: Nome do tipo de operação
+          enum:
+            - Receber crédito
+            - Reservar valor
+            - Transferir valor
+            - Transferir reserva
+            - Pagar à vista
+            - Pagar com cartão de crédito
+            - Agendar pagamento
+        description:
+          type: string
+          description: Descrição do tipo de operação
+    # AccessGrant -----------------------------------------
+    AccessGrant:
+      type: object
+      properties:
+        id:
+          description: ID do registro de concessão de acesso
+          type: integer
+          format: int32
+        agOwnerId:
+          description: ID do proprietário
+          type: integer
+          format: int32
+          example: 11111111
+        agGrantedUserId:
+          description: ID do usuário autorizado
+          type: integer
+          format: int32
+          example: 11111111
+        agAccessRuleId:
+          description: Identificador do perfil de acesso concedido
+          type: integer
+          format: int32
+          example: 4
+        startDate:
+          description: Data da concessão do acesso
+          type: string
+          format: date
+          example: 2021-09-30
+        endDate:
+          description: Data da revogação do acesso
+          type: string
+          format: date
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # User ------------------------------------------------
+    User:
+      type: object
+      properties:
+        id:
+          description: Identificador do usuário
+          type: integer
+          format: int32
+          example: 11111111
+        name:
+          description: Nome do usuário
+          type: string
+          example: Fulano da Silva
+        email:
+          description: Endereço de email do usuário
+          type: string
+          format: email
+          example: fulano@gmail.com
+        hash:
+          description: Hash da senha utilizada para autenticar o usuário
+          type: string
+          format: password
+        token:
+          description: Token de acesso OAuth2
+          type: string
+          format: password
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # Category --------------------------------------------
+    Category:
+      type: object
+      properties:
+        catOwnerId:
+          description: ID do proprietário
+          type: integer
+          format: int32
+          example: 11111111
+        id:
+          description: Identificador da categoria
+          type: integer
+          format: int32
+          example: 001
+        name:
+          description: Categoria
+          type: string
+          example: Moradia
+        isCredit:
+          description: É uma categoria de reserva financeira?
+          type: boolean
+          example: true
+        isActive:
+          description: Está ativa? (usado para desativar quando houver exclusão lógica)
+          type: boolean
+          example: true
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # Account ---------------------------------------------
+    Account:
+      type: object
+      properties:
+        accCategoryId:
+          description: Identificador da categoria
+          type: integer
+          format: int32
+          example: 001
+        id:
+          description: Identificador da conta
+          type: integer
+          format: int32
+          example: 002
+        name:
+          description: Conta
+          type: string
+          example: Luz
+        isCredit:
+          description: É uma conta de reserva financeira?
+          type: boolean
+          example: true
+        isCard:
+          description: É uma conta de cartão de crédito?
+          type: boolean
+          example: false
+        isActive:
+          description: Está ativa? (usado para desativar quando houver exclusão lógica)
+          type: boolean
+          example: true
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # Balance ---------------------------------------------
+    Balance:
+      type: object
+      properties:
+        balAccountId:
+          description: Identificador da conta
+          type: integer
+          format: int32
+          example: 002
+        yearMonth:
+          description: Ano/Mês no formato AAAAMM de referência
+          type: integer
+          format: int64
+          example: 202110
+        value:
+          description: Valor do saldo no mês de referência
+          type: number
+          format: float
+          example: 249.99
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # Operation -------------------------------------------
+    Operation:
+      type: object
+      properties:
+        oprSourceAccountId:
+          description: Conta de origem da operação, indeterminado nas operações de receber crédito e reservar valor.
+          type: integer
+          format: int32
+        oprDestinyAccountId:
+          description: Conta de destino da operação
+          type: integer
+          format: int32
+          example: 002
+        id:
+          description: Identificador da operação
+          type: integer
+          format: int64
+        oprDate:
+          description: Data da operação
+          type: string
+          format: date
+          example: 2021-10-01
+        qtyPayments:
+          description: Quantidade de parcelas, usado para pagamento parcelado no cartão de crédito.
+          type: integer
+          format: int32
+        startDate:
+          description: Data de pagamento da parcela inicial no cartão de crédito.
+          type: string
+          format: date
+        value:
+          description: Valor da operação, quando for pagamento parcelado refere-se ao valor total das parcelas.
+          type: number
+          format: float
+          example: 120.62
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # Shall -----------------------------------------------
+    Shall:
+      type: object
+      properties:
+        shaOperationId:
+          description: Identificador da operação que gerou a obrigação
+          type: integer
+          format: int64
+        id:
+          description: Identificador da obrigação
+          type: integer
+          format: int64
+          example: 123324
+        shallNr:
+          description: Número da parcela
+          type: integer
+          format: int32
+          example: 3
+        shaDate:
+          description: Data de vencimento da parcela
+          type: string
+          format: date
+          example: 2021-12-20
+        value:
+          description: Valor da parcela
+          type: number
+          format: float
+          example: 55.93
+        isPending:
+          description: Obrigação pendente de pagamento?
+          type: boolean
+          example: true
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # Payment ---------------------------------------------
+    Payment:
+      type: object
+      properties:
+        payDebitAccountId:
+          description: Identificador da conta de recurso financeiro utilizada no pagamento da despesa
+          type: integer
+          format: int32
+          example: 025
+        id:
+          description: Identificador do pagamento realizado
+          type: integer
+          format: int64
+          example: 93457
+        payDate:
+          description: Data do pagamento
+          type: string
+          format: date
+          example: 2021-12-20
+        value:
+          description: Valor pago
+          type: number
+          format: float
+          example: 55.93
+        isPending:
+          description: Pagamento está pendente?
+          type: boolean
+          example: true
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
+    # Value -----------------------------------------------
+    Value:
+      type: object
+      properties:
+        value:
+          description: Valor consultado
+          type: number
+          format: float
+  #--------------------------------------------------------#
+  #  R E Q U E S T    B O D I E S                          #
+  #--------------------------------------------------------#
+  requestBodies:
+    # UserIn ----------------------------------------------
+    UserIn:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UserIn"
+      description: Credencial do usuário.
+      required: true
+    # UserToken -------------------------------------------
+    UserToken:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UserToken"
+      description: Token de acesso
+      required: true
+    # AccessGrant -----------------------------------------
+    AccessGrant:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AccessGrant"
+      description: Acesso concedido que precisa ser registrado no controle financeiro pessoal.
+      required: true
+    # User ------------------------------------------------
+    User:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+      description: Dados de usuário do sistema.
+      required: true
+    # Category --------------------------------------------
+    Category:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Category"
+      description: Dados da categoria cadastrada pelo usuário.
+      required: true
+    # Account ---------------------------------------------
+    Account:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Account"
+      description: Dados da conta cadastrada pelo usuário.
+      required: true
+    # Balance ---------------------------------------------
+    Balance:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Balance"
+      description: Saldo da conta cadastrada pelo usuário.
+      required: true
+    # Operation -------------------------------------------
+    Operation:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Operation"
+      description: Operação registrada pelo usuário.
+      required: true
+    # Shall -----------------------------------------------
+    Shall:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Shall"
+      description: Obrigação gerada por operação registrada pelo usuário com agendamento de pagamento.
+      required: true
+    # Payment ---------------------------------------------
+    Payment:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Payment"
+      description: Pagamento de obrigação gerada por operação com agendamento de pagamento.
+      required: true

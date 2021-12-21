@@ -1,0 +1,12 @@
+<form (ngSubmit)="onSubmit()" #form="ngForm" class="sign-form">
+    <p class="text">Já possui registro?<br />Então clique no botão ENTRAR e forneça sua credencial para acessar seu
+        controle
+        financeiro pessoal.</p>
+    <button mat-raised-button color="primary" type="button" class="btn btn-link btn-block btn-primary"
+        [routerLink]="['/signin']">ENTRAR</button>
+
+    <p class="text">Ainda não possui registro?<br />Clique no botão REGISTRAR e faça seu registro e comece a fazer o seu
+        controle financeiro pessoal.</p>
+    <button mat-raised-button color="primary" type="button" class="btn btn-link btn-block"
+        [routerLink]="['/signup']">REGISTRAR</button>
+</form>

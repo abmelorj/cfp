@@ -1,0 +1,26 @@
+<form (ngSubmit)="onSubmit()" #form="ngForm" class="sign-form">
+
+    <mat-form-field appearance="outline">
+        <mat-label>Nome</mat-label>
+        <input matInput placeholder="Informe seu nome" class="form-control" type="text" name="name" id="name"
+            [(ngModel)]="account.name" required />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput placeholder="Ex: seulogin@provedor.com" class="form-control" type="email" name="email"
+            id="email" [(ngModel)]="account.email" required />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+        <mat-label>Senha</mat-label>
+        <input matInput placeholder="Crie uma senha" class="form-control" type="password" name="password"
+            [(ngModel)]="account.password" required />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+        <mat-label>Redigite a Senha</mat-label>
+        <input matInput placeholder="Repita a senha digitada" class="form-control" type="password" name="retypepass"
+            [(ngModel)]="account.retypepass" required />
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit" class="btn btn-primary btn-block"
+        [disabled]="form.form.invalid">Registrar</button>
+</form>

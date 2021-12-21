@@ -1,0 +1,34 @@
+<div class="container">
+
+    <table mat-table [dataSource]="accessGrants" class="mat-elevation-z0">
+        <caption *ngIf="false">Controle financeiro pessoal que você tem acesso</caption>
+
+        <ng-container matColumnDef="owner">
+            <th mat-header-cell *matHeaderCellDef scope="col"> Proprietário </th>
+            <td mat-cell *matCellDef="let element"> {{element.agOwner.name}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="rule">
+            <th mat-header-cell *matHeaderCellDef scope="col"> Perfil </th>
+            <td mat-cell *matCellDef="let element"> {{element.agAccessRule.name}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="start">
+            <th mat-header-cell *matHeaderCellDef scope="col"> Data </th>
+            <td mat-cell *matCellDef="let element"> {{element.startDate | date : 'dd/MM/yy'}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef scope="col"> </th>
+            <td mat-cell *matCellDef="let element">
+                <span *ngIf="cfpService.owner.id != element.agOwnerId" class="material-icons folder-color">
+                    <a (click)="selectCFP(element.agOwner)">folder_open</a>
+                </span>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="tabColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: tabColumns;"></tr>
+    </table>
+
+</div>

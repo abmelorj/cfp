@@ -1,0 +1,35 @@
+.header {
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    padding: 8px;
+}
+
+a {
+    text-decoration: none;
+    color: gray;
+}
+
+
+a:active {
+    background-color: lightgray;
+}
+
+.cfp-left {
+    display: flex;
+    align-items: center;
+    /* text-decoration: none; */
+    justify-content: flex-start;
+}
+
+.cfp-right {
+    display: flex;
+    align-items: center;
+    /* text-decoration: none; */
+    justify-content: flex-end;
+}
+
+.cfp-icon, .cfp-title, .cfp-calendar, .cfp-menu {
+    padding: 8px;
+}

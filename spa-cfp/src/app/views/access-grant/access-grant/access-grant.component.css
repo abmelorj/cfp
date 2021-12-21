@@ -1,0 +1,46 @@
+table {
+    width: 100%;
+    /* height: 100%; */
+}
+
+.mat-cell, .mat-header-cell,
+th.mat-header-cell:first-of-type,
+th.mat-header-cell:last-of-type,
+td.mat-cell:first-of-type,
+td.mat-cell:last-of-type {
+    white-space: nowrap;
+    border: 1;
+    padding: 0.3rem;
+    font-size: 1rem;
+}
+
+th.mat-header-cell:last-of-type,
+td.mat-cell:last-of-type {
+    width: 1.5rem
+}
+
+.mat-header-row {
+    height: 2rem;
+}
+
+.mat-row {
+    height: 3rem;
+}
+
+.mat-header-cell {
+    font-weight: 700;
+    background-color: lightgray;
+    color: black;
+}
+
+.container {
+    width: 100%;
+    /* background-color: brown; */
+    height: 100%;
+}
+
+.mainAction {
+    position: fixed;
+    bottom: 7rem;
+    right: 1rem;
+}

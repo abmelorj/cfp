@@ -1,0 +1,7 @@
+<span class="cfp-label">{{name}}</span>
+<span class="cfp-value">{{value | number : '1.2-2'}}</span>
+<span class="cfp-action" routerLink="{{route}}">
+    <span *ngIf="action == 'edit'" class="material-icons blue">edit</span>
+    <span *ngIf="action == 'delete'" class="material-icons red">delete</span>
+    <span *ngIf="action == 'none'"></span>
+</span>

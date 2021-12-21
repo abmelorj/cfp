@@ -1,0 +1,12 @@
+.example-month-picker .mat-calendar-period-button {
+    pointer-events: none;
+}
+
+.example-month-picker .mat-calendar-arrow {
+    display: none;
+}
+
+mat-form-field.mat-form-field {
+    font-size: 0.6rem;
+    width: 4rem;
+}

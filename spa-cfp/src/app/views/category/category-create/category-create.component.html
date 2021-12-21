@@ -1,0 +1,9 @@
+<form (ngSubmit)="addCategory()" #form="ngForm" class="form">
+    <mat-form-field appearance="outline">
+        <mat-label>Nome da categoria</mat-label>
+        <input matInput [placeholder]="placeHolderText" class="form-control" type="text" name="name" id="name"
+            [(ngModel)]="category.name" required />
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit" class="btn btn-primary btn-block"
+        [disabled]="form.form.invalid">CRIAR</button>
+</form>

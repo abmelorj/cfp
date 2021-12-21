@@ -1,0 +1,25 @@
+.cfp-label, .cfp-value, .cfp-action {
+    display: flex;
+    align-items: center;
+    height: 1.2rem;
+    font-size: 1.1rem;
+    padding: 2px;
+}
+
+.cfp-label {
+    justify-content: flex-start;
+    width: 60%;
+    /* background-color: blue; */
+}
+
+.cfp-value {
+    justify-content: flex-end;
+    width: 20%;
+    /* background-color: brown; */
+}
+
+.cfp-action {
+    justify-content: center;
+    width: 10%;
+    /* background-color: aqua; */
+}

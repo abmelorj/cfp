@@ -1,0 +1,25 @@
+<form (ngSubmit)="grantAccess()" #form="ngForm" class="form">
+    <mat-form-field appearance="outline">
+        <mat-label>ID</mat-label>
+        <input matInput placeholder="Número identificador" class="form-control" type="number" name="id" id="id"
+            [(ngModel)]="user.id" required />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput placeholder="Ex: userlogin@provedor.com" class="form-control" type="email" name="email"
+            id="email" [(ngModel)]="user.email" required />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+        <mat-label>Perfil de acesso</mat-label>
+        <mat-select [(value)]="accessGrant.agAccessRuleId">
+            <mat-option *ngFor="let rule of accessRules" [value]="rule.id">
+                {{rule.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div>
+        <button #update mat-raised-button color="primary" type="submit" class="btn btn-primary btn-block"
+            [disabled]="form.form.invalid">CONCEDER</button>
+    </div>
+    <p class="text">Informe ID e email, e selecione o perfil de acesso que deseja conceder.</p>
+</form>

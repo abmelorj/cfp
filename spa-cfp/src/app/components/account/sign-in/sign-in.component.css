@@ -1,0 +1,31 @@
+.sign-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 18rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2rem;
+}
+
+.text {
+    text-align: center;
+    margin: 0.5rem;
+    width: 16rem;
+    font-size: 1.1rem;
+}
+
+.separator {
+    margin: 1rem;
+    color: gray;
+}
+
+.mat-button-base {
+    margin: 8px 8px 8px 8px;
+    width: 11rem;
+    font-size: 1rem;
+}
+
+.mat-form-field {
+    width: 100%;
+}

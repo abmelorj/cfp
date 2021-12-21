@@ -1,0 +1,19 @@
+:host ::ng-deep .mat-tab-label {
+    width: 50%;
+    font-size: 1.2rem;
+}
+
+mat-tab-group {
+    /* background-color: aqua; */
+    height: 100%;
+}
+
+app-list-item {
+    height: 2rem;
+}
+
+.mainAction {
+    position: fixed;
+    bottom: 7rem;
+    right: 1rem;
+}

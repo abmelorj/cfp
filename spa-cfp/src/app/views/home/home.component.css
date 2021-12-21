@@ -1,0 +1,47 @@
+.sidenav {
+    /* background-color: #3F51B5; */
+    width: 18rem;
+}
+
+/* .sidenav a {
+    color: #FFF;
+} */
+
+.sidenav i {
+    padding-right: 8px;
+}
+
+.container {
+    /* Esse container deveria ocupar toda a altura disponível sem atropelar o footer */
+    background-color: white;
+    /* padding: 6px; */
+    height: 100%;
+    /* para falta de suporte */
+    height: -webkit-calc(100% - 10.5rem);
+    /* para Chrome */
+    height: -moz-calc(100% - 10.5rem);
+    /* para Firefox */
+    height: calc(100% - 10.5rem);
+    /* para suporte nativo */
+}
+
+.content {
+    padding: 0.3rem;
+    /* background-color: #FFF; */
+    /* background-color: bisque; */
+    height: 100%;
+}
+
+.bottom {
+    position: fixed;
+    bottom: 0;
+    padding: 8px;
+    font-size: 0.8rem;
+    /* background-color: brown; */
+}
+
+.field {
+    padding: 0px;
+    margin: 0px;
+    font-weight: 900;
+}
