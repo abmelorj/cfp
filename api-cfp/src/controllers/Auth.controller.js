@@ -89,7 +89,8 @@ const userSignup = async (req, res, next) => {
                             agOwnerId: newUser.id,
                             agGrantedUserId: newUser.id,
                             agAccessRuleId: 1,
-                            version: newUser.version
+                            version: newUser.version,
+                            startDate: newUser.version
                         };
                         await AccessGrant.create(grant)
                             // Tratar a criação do token de sessão de autenticação do usuário registrado

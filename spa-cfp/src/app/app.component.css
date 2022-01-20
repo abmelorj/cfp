@@ -15,6 +15,7 @@ p {
     margin: 0;
 }
 
+/*
 .spacer {
     flex: 1;
 }
@@ -253,10 +254,12 @@ svg#clouds {
     z-index: -10;
     width: 1920px;
 }
+*/
 
 /* Responsive Styles */
 
 @media screen and (max-width: 767px) {
+    /*
     .card-container>*:not(.circle-link), .terminal {
         width: 100%;
     }
@@ -271,11 +274,14 @@ svg#clouds {
         right: 120px;
         transform: rotate(-5deg);
     }
+    */
 }
 
 @media screen and (max-width: 575px) {
+    /*
     svg#rocket-smoke {
         display: none;
         visibility: hidden;
     }
+    */
 }
