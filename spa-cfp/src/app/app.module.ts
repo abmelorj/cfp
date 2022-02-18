@@ -1,6 +1,6 @@
 // Angular
 import { NgModule, LOCALE_ID } from '@angular/core';
-import { registerLocaleData } from '@angular/common';
+import { registerLocaleData, HashLocationStrategy, LocationStrategy } from '@angular/common';
 import localePt from '@angular/common/locales/pt'
 registerLocaleData(localePt);
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -89,6 +89,7 @@ import { AccountUpdateComponent } from './views/account/account-update/account-u
     UserService,
     CategoryService,
     { provide: LOCALE_ID, useValue: 'pt-BR' },
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
     httpInterceptorProviders
   ],
   bootstrap: [AppComponent]

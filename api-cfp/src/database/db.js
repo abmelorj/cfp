@@ -35,7 +35,7 @@ const db = new Sequelize(db_name, db_user, db_pass, {
 // CREATE DATABASE IF NOT EXISTS dbcfptest CHARACTER SET = 'utf8mb4' COLLATE = 'utf8mb4_swedish_ci';
 module.exports = db;
 
-// Campo criado pelo Squelize: 
+// Campo criado pelo Sequelize: 
 //      Alteração de NOT NULL para NULL não foi realizada como esperado no BD.
 //           Necessário usar Sequelize-CLI para realizar Migrations
 //           https://sequelize.org/master/manual/migrations.html
