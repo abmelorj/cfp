@@ -17,7 +17,7 @@ RUN npm install -g @angular/cli
 RUN npm install @angular/compiler-cli --force
 RUN npm install @angular-devkit/build-angular --force
 RUN ng update @angular/cdk @angular/core @angular/material
-RUN ng build --prod
+RUN ng build
 
 FROM nginx:alpine AS spa-cfp
 COPY --from=spa-cfp-builder /spa-cfp/dist/spa-cfp/ /usr/share/nginx/html
