@@ -50,7 +50,7 @@ paths:
   /api/accessrules:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accessrules
       summary: Lista perfis de acesso
@@ -72,7 +72,7 @@ paths:
   /api/accessrules/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accessrules
       summary: Obtém perfil de acesso
@@ -101,7 +101,7 @@ paths:
   /api/operationtypes:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operationtypes
       summary: Lista tipos de operação
@@ -123,7 +123,7 @@ paths:
   /api/operationtypes/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operationtypes
       summary: Obtém tipo de operação
@@ -152,7 +152,7 @@ paths:
   /api/accessgrants:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accessgrants
       summary: Registra concessão de acesso
@@ -183,7 +183,7 @@ paths:
   /api/accessgrants/{id}:
     delete:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accessgrants
       summary: Revoga o acesso concedido
@@ -220,7 +220,7 @@ paths:
   /api/accessgrants/{id}/grants:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accessgrants
       summary: Lista os acessos concedidos pelo proprietário
@@ -259,7 +259,7 @@ paths:
   /api/accessgrants/{id}/granted:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accessgrants
       summary: Lista os acessos recebidos
@@ -348,12 +348,12 @@ paths:
   /auth/Validate:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - users
-      summary: Autentica usuário
-      description: Autentica usuário no controle financeiro pessoal.
-      operationId: userSignin
+      summary: Valida token e autentica usuário
+      description: Valida token e autentica usuário no controle financeiro pessoal.
+      operationId: validateToken
       responses:
         200:
           description: "Token verificado."
@@ -370,7 +370,7 @@ paths:
   /api/signout:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - users
       summary: Desconecta o usuário
@@ -399,7 +399,7 @@ paths:
   /api/users/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - users
       summary: Obtém registro do usuário
@@ -429,7 +429,7 @@ paths:
 
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - users
       summary: Atualiza registro do usuário
@@ -467,7 +467,7 @@ paths:
 
     delete:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - users
       summary: Exclui usuário do sistema
@@ -494,7 +494,7 @@ paths:
   /api/categories:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - categories
       summary: Cadastra categoria
@@ -529,7 +529,7 @@ paths:
 
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - categories
       summary: Atualiza categoria
@@ -562,7 +562,7 @@ paths:
   /api/categories/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - categories
       summary: Obtém registro da categoria
@@ -597,7 +597,7 @@ paths:
 
     delete:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - categories
       summary: Exclui categoria
@@ -624,7 +624,7 @@ paths:
   /api/categories/owner/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - categories
       summary: Lista as categorias do usuário
@@ -662,7 +662,7 @@ paths:
   /api/categories/{id}/accounts:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - categories
         - accounts
@@ -702,7 +702,7 @@ paths:
   /api/accounts:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
       summary: Cadastra conta
@@ -731,7 +731,7 @@ paths:
 
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
       summary: Atualiza dados da conta
@@ -761,7 +761,7 @@ paths:
   /api/accounts/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
       summary: Recupera dados da conta
@@ -798,7 +798,7 @@ paths:
 
     delete:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
       summary: Exclui conta
@@ -831,7 +831,7 @@ paths:
   /api/accounts/owner/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
       summary: Lista contas por proprietário
@@ -866,7 +866,7 @@ paths:
   /api/accounts/{id}/pendingValue:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
       summary: Obtém valor do saldo comprometido
@@ -899,7 +899,7 @@ paths:
   /api/accounts/{id}/pendingValue/{yearMonth}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
       summary: Obtém valor do saldo comprometido no mês
@@ -939,7 +939,7 @@ paths:
   /api/accounts/{id}/operationsBy/{yearMonth}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Recupera a lista de operações de uma conta no mês indicado
@@ -982,7 +982,7 @@ paths:
   /api/accounts/{id}/balance:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
         - balances
@@ -1016,7 +1016,7 @@ paths:
   /api/accounts/{id}/balance/{yearMonth}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - accounts
         - balances
@@ -1058,7 +1058,7 @@ paths:
   /api/operations/credit:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Registra operação de crédito de valor em conta de recurso financeiro
@@ -1079,7 +1079,7 @@ paths:
   /api/operations/reserv:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Registra operação de reserva de valor em conta de reserva financeira
@@ -1100,7 +1100,7 @@ paths:
   /api/operations/transfer:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Registra operação de transferência de valor entre contas de recurso financeiro ou de reserva financeira
@@ -1121,7 +1121,7 @@ paths:
   /api/operations/forecast:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Registra operação de agendamento de despesa ainda sem definição da conta de recurso financeiro que será usada na liquidação
@@ -1142,7 +1142,7 @@ paths:
   /api/operations/pay:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Registra operação de pagamento à vista, agendado ou com cartão de crédito
@@ -1163,7 +1163,7 @@ paths:
   /api/operations/{id}:
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Atualiza dados de operação
@@ -1191,7 +1191,7 @@ paths:
 
     delete:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
       summary: Exclui operação
@@ -1215,7 +1215,7 @@ paths:
   /api/operations/{id}/shalls:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - operations
         - shalls
@@ -1246,7 +1246,7 @@ paths:
   /api/shalls/{id}:
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - shalls
       summary: Atualiza/ajusta dados da obrigação
@@ -1274,7 +1274,7 @@ paths:
 
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - shalls
       summary: Recupera dados da obrigação agendada
@@ -1303,7 +1303,7 @@ paths:
   /api/shalls/{id}/payup:
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - shalls
       summary: Realiza pagamento de obrigação agendada
@@ -1332,7 +1332,7 @@ paths:
   /api/shalls/{id}/payment:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - shalls
       summary: Recupera registro do pagamento pelo identificador da obrigação
@@ -1362,7 +1362,7 @@ paths:
   /api/payments/{id}:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - payments
       summary: Recupera dados de pagamento
@@ -1390,7 +1390,7 @@ paths:
 
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - payments
       summary: Atualiza dados de pagamento
@@ -1418,7 +1418,7 @@ paths:
 
     delete:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - payments
       summary: Exclui pagamento
@@ -1442,7 +1442,7 @@ paths:
   /api/payments:
     post:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - payments
         - payshalls
@@ -1464,7 +1464,7 @@ paths:
   /api/payments/{id}/payup:
     put:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - payments
         - payshalls
@@ -1494,7 +1494,7 @@ paths:
   /api/payments/{id}/shalls:
     get:
       security:
-        - bearerAuth: []
+        - APIKeySecurityScheme: []
       tags:
         - payments
         - payshalls
@@ -1986,7 +1986,7 @@ components:
   #  S E C U R I T Y    S C H E M E S                      #
   #--------------------------------------------------------#
   securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
+    APIKeySecurityScheme:
+      type: apiKey
+      name: Authorization
+      in: header

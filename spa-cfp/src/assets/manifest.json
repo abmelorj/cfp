@@ -1,14 +1,18 @@
 {
-    "short_name": "Weather",
-    "name": "Weather: Do I need an umbrella?",
+    "short_name": "CFP",
+    "name": "Controle Financeiro Pessoal",
     "icons": [
         {
-            "src": "/images/icons-192.png",
+            "src": "/assets/account_balance_black_36dp.svg",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "/assets/account_balance_black_192px.png",
             "type": "image/png",
             "sizes": "192x192"
         },
         {
-            "src": "/images/icons-512.png",
+            "src": "/assets/account_balance_black_512px.png",
             "type": "image/png",
             "sizes": "512x512"
         }
