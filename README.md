@@ -98,8 +98,8 @@ abmelorj/api-cfp:latest`
 
 >>> `$ docker start api-cfp`
 
-
-## 3º) **SPA-CFP** (FronEnd)
+#
+## **3º) SPA-CFP** (FronEnd)
 1. O terceiro e último nó de processamento a ser carregado é o container do servidor Web que será responsável por prover as páginas estáticas da aplicação CFP, que é uma Single Page Application Angular, e também por criptografar as requisições realizadas pela Aplicação, em execução no dispositivo do usuário final, aos serviços providos pela API-CFP. Logo é necessário executar o comando a seguir:
 
 >>> `docker run --name spa-cfp  -d --mount type=bind,source=/`*path_on_host*`,target=/etc/nginx/certs -p 80:80 -p 443:443 abmelorj/spa-cfp:latest`
