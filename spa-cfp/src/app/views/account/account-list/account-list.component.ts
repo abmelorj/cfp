@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { CategoryService } from './../../../services/category.service';
 import { ActivatedRoute } from '@angular/router';
 import { AccountService } from './../../../services/account.service';
@@ -12,7 +14,7 @@ import { Account } from 'src/app/models/account.interface';
 })
 export class AccountListComponent implements OnInit, AfterContentChecked {
 
-  @Input() accounts: Account[] = [];
+  @Input() accounts$: Observable<Account[]>;
   @Input() categoryName: string = '';
 
   constructor(
@@ -31,21 +33,20 @@ export class AccountListComponent implements OnInit, AfterContentChecked {
         , err => cfpService.showMessage(err));
 
     // Recupera a lista de contas da categoria selecionada
-    accountService.listAccountsByCategoryId(categoryId)
-      .subscribe(accountArrayApi => this.accounts = accountArrayApi
-        , err => cfpService.showMessage(err));
+    this.accounts$ = accountService.listAccountsByCategoryId(categoryId)
+      .pipe(map(accounts$ => accounts$.map(account => {
+        account.balanceByMonth$ = this.accountService.getAccountBalanceByMonth(account.id || 0);
+        return account;
+      })));
+
     if (cfpService.getCategoryTabIndex() == 1)
       cfpService.moduleName = 'Recurso Financeiro'
     else
       cfpService.moduleName = 'Reserva Financeira';
   }
 
-  ngOnInit(): void {
+  ngOnInit(): void { }
 
-  }
-
-  ngAfterContentChecked(): void {
-
-  }
+  ngAfterContentChecked(): void { }
 
 }

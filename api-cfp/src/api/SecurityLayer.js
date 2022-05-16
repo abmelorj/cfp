@@ -10,18 +10,18 @@ module.exports = (req, res, next) => {
         next()
     }
     else {
+        // Verifica se tem token de acesso
         const token = req.body.token || req.query.token || req.headers['authorization']
         if (!token) {
             return res.status(403).send(logerr('Somente acesso autenticado.'))
         }
+        // Verifica se o token é válido
         jwt.verify(token, authSecret, function (err, decoded) {
             if (err) {
                 return res.status(403).send(logerr('Token inválido.'))
             } else {
+                // O controle de acesso de acordo com o perfil é executado em cada operacao dentro do controller
                 req.decoded = decoded
-                // TODO: Implementar...
-                // Identificar maior perfil de acesso do usuário no CFP requisitado
-                // Verificar se atende ao requisito de acesso da operação
                 if ((process.env.DEBUG || 'false') == 'true') {
                     console.log(
                         ' ==========================================================\n',

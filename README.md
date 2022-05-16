@@ -108,9 +108,9 @@ abmelorj/api-cfp:latest`
 
 > * **dhparam.pem**: o arquivo com o certificado gerado para proteger a troca de chaves Diffie-Hellman, realizada no processo inicial de handshake entre o Servidor Web e o Navegador do usuário. ([cfp/spa-cfp/src/environments/ssl-params.conf](https://github.com/abmelorj/cfp/blob/main/spa-cfp/src/environments/ssl-params.conf))
 
-> * **name_for_cert.pem**: arquivo contendo `o certificado` usado para identificar o domínio do servidor Web da aplicação CFP.
+> * **name_for_cert.pem**: arquivo contendo `o certificado` usado para identificar o domínio do servidor Web da aplicação CFP. O Let's Encrypt gera o arquivo `fullchain.pem`.
 
-> * **name_for_cert-key.pem**: arquivo contendo `a chave privada` usada para identificar o domínio do servidor Web da aplicação CFP.
+> * **name_for_cert-key.pem**: arquivo contendo `a chave privada` usada para identificar o domínio do servidor Web da aplicação CFP. O Let's Encrypt gera o arquivo `privkey.pem`.
 
 > * **ssl-certs.conf**: arquivo de configuração contendo apenas as duas linhas abaixo, indicando os nomes dos arquivos com o certificado (**name_for_cert.pem**) e a chave privada (**name_for_cert-key.pem**) usados para identificar o domínio do servidor Web da aplicação CFP.
 >> * `ssl_certificate /etc/nginx/certs/`*name_for_cert.pem*

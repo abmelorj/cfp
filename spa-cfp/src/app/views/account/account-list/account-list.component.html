@@ -1,8 +1,9 @@
 <mat-tab-group mat-align-tabs="center" animationDuration="0ms">
     <mat-tab label="{{categoryName}}">
-        <span *ngFor="let account of accounts">
-            <app-list-item name="{{account.name}}" [value]=account.accCategoryId action="edit"
-                route="/account/update/{{account.id}}" class="cfp-list-item-line">
+        <span *ngFor="let account of accounts$ | async">
+            <app-list-item *ngIf="(account.balanceByMonth$ | async) || {value: 0} as balanceByMonth"
+                name="{{account.name}}" [value]="balanceByMonth === undefined ? 0 : balanceByMonth.value || 0"
+                action="edit" route="/account/update/{{account.id}}" class="cfp-list-item-line">
             </app-list-item>
         </span>
         <button mat-fab color="primary" aria-label="Button with an add icon" class="mainAction"

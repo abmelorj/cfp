@@ -5,10 +5,41 @@ const AccessGrant = require('../models/AccessGrant');
 const AccessRule = require('../models/AccessRule');
 const Account = require('../models/Account');
 const Category = require('../models/Category');
-const User = require('../models/User');
 const logerr = require('../config/logerr');
 const loginfo = require('../config/loginfo');
+const Balance = require('../models/Balance');
 
+exports.getAccountBalanceByMonth = async function (req, res) {
+    debug(' getAccountBalanceByMonth() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'getAccountBalanceByMonth() ======================= fim');
+    await validateAccountId(req.params.id, req.decoded.id)
+        .then(verifyAccessAuditor)
+        .then(account => getBalanceByMonth(account, req.params.yearMonth))
+        .then(balance => {
+            debug('Balance => ', balance)
+            res.status(200).send(balance)
+        })
+        .catch(err => returnErr(err, res))
+}
+
+exports.getAccountBalance = async function (req, res) {
+    debug(' getAccountBalance() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'getAccountBalance() ======================= fim');
+    await validateAccountId(req.params.id, req.decoded.id)
+        .then(verifyAccessAuditor)
+        .then(getBalance)
+        .then(balance => {
+            debug('Balance => ', balance)
+            //res.status(200).send(balance !== null ? balance : [{}])
+            res.status(200).send(balance)
+        })
+        .catch(err => returnErr(err, res))
+}
 
 exports.getAccountById = async function (req, res) {
     debug(' getAccountById() ======================= ini\n',
@@ -50,7 +81,10 @@ exports.listAccountByOwnerId = async function (req, res) {
         await Account.findByOwnerId(req.params.id)
             .then(accounts => {
                 debug('Accounts => ', accounts)
-                res.status(200).send(accounts !== undefined ? accounts.dataValues : [{}])
+                accounts = accounts.map(account => account.dataValues);
+                debug('Accounts Mapped => ', accounts)
+                //res.status(200).send(accounts !== undefined ? accounts.dataValues : [{}])
+                res.status(200).send(accounts);
             })
             .catch(err => returnErr(err, res))
     }
@@ -166,6 +200,56 @@ function validateAccountId(accountId, userId) {
             .catch(err => reject(`Erro ao pesquisar conta ==> [${err}]`));
     })
 }
+
+//Recupera o saldo da conta
+function getBalance(account) {
+    debug(' getBalance() ======================= ini\n',
+        'account => ', account, '\n',
+        'getBalance() ======================= fim');
+
+    return new Promise(async (resolve, reject) => {
+        await Balance.getBalance(account.id)
+            .then(balanceFound => {
+                resolve(balanceFound)
+            }, reason => reject(`Erro: Dados inválidos. ${reason}`))
+            .catch(err => reject(`Erro ao buscar saldo da conta ==> [${err}]`));
+    })
+}
+
+//Recupera o saldo da conta até o mês
+function getBalanceByMonth(account, yearMonth) {
+    debug(' getBalanceByMonth() ======================= ini\n',
+        'account => ', account, '\n',
+        'yearMonth => ', yearMonth, '\n',
+        'getBalanceByMonth() ======================= fim');
+
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Verifica se o mês informado é válido
+            let month = parseInt(yearMonth.substring(yearMonth.length - 2, yearMonth.length))
+            debug('month string => ', yearMonth.substring(yearMonth.length - 2, yearMonth.length), '\n',
+                'month parseInt => ', month);
+            if (isNaN(month) || month < 1 || month > 12)
+                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
+            // Verifica se o ano informado é válido, acima de 1900
+            let year = parseInt(yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2))
+            debug('year string => ', yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2), '\n',
+                'year parseInt => ', year);
+            if (isNaN(year) || year < 1900)
+                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
+        } catch (err) {
+            reject(`Erro ao validar yearMonth=${yearMonth} ==> [${err}]`);
+        }
+
+        await Balance.getBalanceByYearMonth(account.id, yearMonth)
+            .then(balanceFound => {
+                resolve(balanceFound)
+            }, reason => reject(`Erro: Dados inválidos. ${reason}`))
+            .catch(err => reject(`Erro ao buscar saldo da conta ==> [${err}]`));
+    })
+}
+
+
 
 // ==============================================================
 // Cadastra conta
@@ -333,6 +417,10 @@ function validateFields(account, userId) {
         resolve({ account, userId });
     })
 }
+
+// ==============================================================
+// Rotinas de apoio
+// ==============================================================
 
 function returnErr(err, res) {
     if (!err.status)

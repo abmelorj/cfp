@@ -1,4 +1,5 @@
 import { Account } from 'src/app/models/account.interface';
+import { Balance } from 'src/app/models/balance.interface';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -29,6 +30,14 @@ export class AccountService {
 
   getAccountById(id: number): Observable<Account> {
     return this.http.get<Account>(`${environment.api}/accounts/${id}`)
+  }
+
+  getAccountBalance(id: number): Observable<Balance> {
+    return this.http.get<Balance>(`${environment.api}/accounts/${id}/balance}`)
+  }
+
+  getAccountBalanceByMonth(id: number): Observable<Balance> {
+    return this.http.get<Balance>(`${environment.api}/accounts/${id}/balance/${this.cfp.yearMonth}`)
   }
 
   updateAccount(account: Account): Observable<Account> {

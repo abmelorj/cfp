@@ -1,3 +1,5 @@
+import { Observable } from 'rxjs';
+import { Balance } from './balance.interface';
 export interface Account {
     id?: number
     name: string
@@ -6,4 +8,5 @@ export interface Account {
     isActive?: boolean
     version?: Date
     accCategoryId: number
+    balanceByMonth$?: Observable<Balance>
 }

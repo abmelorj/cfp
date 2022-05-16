@@ -1,6 +1,6 @@
 {
   "name": "api-cfp",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "API-CFP: back-end do Controle Financeiro Pessoal",
   "main": "server.js",
   "scripts": {

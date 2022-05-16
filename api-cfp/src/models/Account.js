@@ -64,7 +64,7 @@ Account.init({
     engine: 'InnoDB',
     sequelize: db,
     modelName: 'Account',
-    comment: 'Contas de recurso financeiro (débito), reserva financeira (crédito) ou cartão de crédito criadas pelo proprietário ou coautor do controle financeiro para facilitar a navegação no controle financeiro.',
+    comment: 'Contas de recurso financeiro (débito), reserva financeira (crédito) ou cartão de crédito criadas pelo proprietário ou coautor do controle financeiro para organizar o controle financeiro.',
     freezeTableName: true,
     timestamps: false
 });

@@ -196,7 +196,7 @@ exports.updateCategory = async function (req, res) {
                     return category;
             })
             // pesquisar a categoria pelo id para atualizar o nome
-            .then(async () => await Category.findByPk(req.body.id))
+            .then(async () => Category.findByPk(req.body.id))
             .then(async category => {
                 if (category == null)
                     throw new Object({ status: 404, message: `Categoria não localizada (${req.body.id})` })
@@ -306,6 +306,7 @@ exports.listAccountByCategoryId = function (req, res) {
                 accounts = await category.getAccCategory();
                 debug('Accounts => ', accounts)
                 accounts = accounts.map(account => account.dataValues);
+                debug('Accounts Mapped => ', accounts)
                 resolve(res.status(200).send(accounts));
             })
             .catch(err => reject(returnErr(`Erro ao buscar categoria ==> [${err}]`, res)));
