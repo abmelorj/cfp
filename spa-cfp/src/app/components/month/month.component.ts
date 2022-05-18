@@ -1,5 +1,5 @@
 import { CFPService } from './../../services/cfp.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, DoCheck } from '@angular/core';
 
 import { FormControl } from '@angular/forms';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
@@ -49,7 +49,7 @@ export const MY_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
   ]
 })
-export class MonthComponent implements OnInit {
+export class MonthComponent implements OnInit, OnChanges, DoCheck {
   date = new FormControl(moment());
 
   constructor(private cfpService: CFPService) { }
@@ -58,11 +58,27 @@ export class MonthComponent implements OnInit {
     this.cfpService.yearMonth = this.getYearMonth();
   }
 
+  ngOnChanges(_changes: SimpleChanges): void {
+  }
+
+  ngDoCheck(): void {
+  }
+
+  refreshViews(): void {
+    // Atualizar a lista de categorias quando altera o mês selecionado
+    if (this.cfpService.categoryComponent)
+      this.cfpService.categoryComponent.loadCategories();
+    // Atualizar a lista de contas quando altera o mês selecionado
+    if (this.cfpService.accountListComponent)
+      this.cfpService.accountListComponent.loadAccounts();
+  }
+
   chosenYearHandler(normalizedYear: Moment) {
     const ctrlValue = this.date.value;
     ctrlValue.year(normalizedYear.year());
     this.date.setValue(ctrlValue);
     this.cfpService.yearMonth = this.getYearMonth();
+    this.refreshViews();
   }
 
   chosenMonthHandler(normalizedMonth: Moment, datepicker: MatDatepicker<Moment>) {
@@ -71,6 +87,7 @@ export class MonthComponent implements OnInit {
     this.date.setValue(ctrlValue);
     datepicker.close();
     this.cfpService.yearMonth = this.getYearMonth();
+    this.refreshViews();
   }
 
   getYearMonth() {

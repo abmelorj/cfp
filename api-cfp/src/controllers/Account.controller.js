@@ -35,7 +35,6 @@ exports.getAccountBalance = async function (req, res) {
         .then(getBalance)
         .then(balance => {
             debug('Balance => ', balance)
-            //res.status(200).send(balance !== null ? balance : [{}])
             res.status(200).send(balance)
         })
         .catch(err => returnErr(err, res))
@@ -224,6 +223,7 @@ function getBalanceByMonth(account, yearMonth) {
         'getBalanceByMonth() ======================= fim');
 
     return new Promise(async (resolve, reject) => {
+        // TO-DO: VerifyYearMonthInvalid
         try {
             // Verifica se o mês informado é válido
             let month = parseInt(yearMonth.substring(yearMonth.length - 2, yearMonth.length))

@@ -1,3 +1,4 @@
+import { AccountListComponent } from './../views/account/account-list/account-list.component';
 import { Category } from 'src/app/models/category.interface';
 'use strict';
 
@@ -45,12 +46,14 @@ export class CFPService {
         return this.owner.id == 0 && this.owner.email == ''
     }
 
-    // Category Component, usado para selecionar a aba a partir do menu.
+    // Category Component, armazena a referência do componente CategoryComponent para:
+    // - setar o tabIndex da aba de categorias a partir do menu no HomeComponent;
+    // - atualizar lista de categorias e saldos quando alterar o mês selecionado no MonthComponent.
+    public categoryComponent?: CategoryComponent
     private categoryTabIndex?: number
     public getCategoryTabIndex(): number {
         return this.categoryTabIndex || 0
     }
-    public categoryComponent?: CategoryComponent
     public setCategoryTabIndex(index: number) {
         this.categoryTabIndex = index
         if (this.categoryComponent)
@@ -65,6 +68,10 @@ export class CFPService {
     setCategory(category: Category): void {
         this.category = { ...category };
     }
+
+    // Account List Component, armazena a referência do componente AccountListComponent para:
+    // - atualizar lista de contas e saldos quando alterar o mês selecionado no MonthComponent.
+    public accountListComponent?: AccountListComponent;
 
     async digest(message: string, algorithm = 'SHA-512') {
         // encode as (utf-8) Uint8Array

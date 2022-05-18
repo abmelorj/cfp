@@ -1054,6 +1054,83 @@ paths:
           description: "Erro: Outros erros."
           content: {}
 
+  /api/categories/{id}/balance:
+    get:
+      security:
+        - APIKeySecurityScheme: []
+      tags:
+        - accounts
+        - balances
+        - categories
+      summary: Obtém a soma do saldo das contas da categoria
+      operationId: getCategoryBalance
+      parameters:
+        - name: id
+          in: path
+          description: ID da categoria
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Soma do saldo das contas da categoria
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Categoria não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/categories/{id}/balance/{yearMonth}:
+    get:
+      security:
+        - APIKeySecurityScheme: []
+      tags:
+        - accounts
+        - balances
+        - categories
+      summary: Obtém a soma do saldo das contas da categoria no mês
+      operationId: getCategoryBalanceByMonth
+      parameters:
+        - name: id
+          in: path
+          description: ID da categoria
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: yearMonth
+          in: path
+          description: Ano/Mês no formato AAAAMM de referência
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Soma do saldo das contas da categoria no mês
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        403:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Conta não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
   # Operation ---------------------------------------------
   /api/operations/credit:
     post:

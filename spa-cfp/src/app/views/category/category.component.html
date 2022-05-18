@@ -1,7 +1,8 @@
 <mat-tab-group mat-align-tabs="center" animationDuration="0ms" [(selectedIndex)]="categoryTabIndex">
     <mat-tab label="Reserva">
         <span *ngFor="let reserv of reservs">
-            <app-list-item name="{{reserv.name}}" [value]=reserv.catOwnerId action="edit" route="edit/{{reserv.id}}"
+            <app-list-item *ngIf="(reserv.balanceByMonth$ | async) || {value: 0} as reservBalanceByMonth"
+                name="{{reserv.name}}" [value]="reservBalanceByMonth.value" action="edit" route="edit/{{reserv.id}}"
                 class="cfp-list-item-line" routerLink="/account/list/{{reserv.id}}">
             </app-list-item>
         </span>
@@ -11,7 +12,8 @@
     </mat-tab>
     <mat-tab label="Recurso">
         <span *ngFor="let fund of funds">
-            <app-list-item name="{{fund.name}}" [value]=fund.catOwnerId action="edit" route="edit/{{fund.id}}"
+            <app-list-item *ngIf="(fund.balanceByMonth$ | async) || {value: 0} as fundBalanceByMonth"
+                name="{{fund.name}}" [value]="fundBalanceByMonth.value" action="edit" route="edit/{{fund.id}}"
                 class="cfp-list-item-line" routerLink="/account/list/{{fund.id}}">
             </app-list-item>
         </span>

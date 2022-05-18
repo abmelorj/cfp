@@ -4,8 +4,8 @@ const { Model, DataTypes, Op } = require('sequelize');
 const db = require('./../database/db');
 
 class Balance extends Model {
-
-    // buscar o saldo do ultimo mes
+    // Account ------------------------------------------------------
+    // buscar o saldo final da conta, quando não localizar retorna null
     static async getBalance(balAccountId) {
         return Balance.findOne({
             where: { balAccountId },
@@ -15,7 +15,7 @@ class Balance extends Model {
             .then(balance => balance, reason => reason)
             .catch(err => err);
     }
-    // buscar o saldo até o mes informado
+    // buscar o saldo da conta até o mes informado, quando não localizar retorna null
     static async getBalanceByYearMonth(balAccountId, yearMonth) {
         return Balance.findOne({
             where: {
@@ -30,6 +30,17 @@ class Balance extends Model {
             .then(balance => balance, reason => reason)
             .catch(err => err);
     }
+    // // Category -----------------------------------------------------
+    // // buscar a soma do saldo final das contas da categoria, quando não localizar retorna null
+    // static async getBalance(balAccountIds) {
+    //     return Balance.findOne({
+    //         where: { balAccountId: [...balAccountIds] },
+    //         order: [['yearMonth', 'DESC']],
+    //         limit: 1
+    //     })
+    //         .then(balance => balance, reason => reason)
+    //         .catch(err => err);
+    // }
 }
 
 Balance.init({

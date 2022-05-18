@@ -33,7 +33,7 @@ export class AccountService {
   }
 
   getAccountBalance(id: number): Observable<Balance> {
-    return this.http.get<Balance>(`${environment.api}/accounts/${id}/balance}`)
+    return this.http.get<Balance>(`${environment.api}/accounts/${id}/balance`)
   }
 
   getAccountBalanceByMonth(id: number): Observable<Balance> {

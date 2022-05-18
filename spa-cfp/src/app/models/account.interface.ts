@@ -8,5 +8,6 @@ export interface Account {
     isActive?: boolean
     version?: Date
     accCategoryId: number
+    balance$?: Observable<Balance>
     balanceByMonth$?: Observable<Balance>
 }

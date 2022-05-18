@@ -3,10 +3,12 @@ require('dotenv').config();
 
 const AccessGrant = require('../models/AccessGrant');
 const AccessRule = require('../models/AccessRule');
+const Balance = require('../models/Balance');
 const Category = require('../models/Category');
 const User = require('../models/User');
 const logerr = require('../config/logerr');
 const loginfo = require('../config/loginfo');
+const { getBalanceByYearMonth } = require('../models/Balance');
 
 // Validar preenchimento de name, catOwnerId e isCredit
 function validateNameOwnerCredit(category) {
@@ -161,6 +163,107 @@ function isCreditCardCategory(name) {
         nameUpper == 'CARTÃO DE CRÉDITOS'
 }
 
+
+// Validar preenchimento do parametro: categoryId
+function validateCategoryId(categoryId, userId) {
+    debug(' validateCategoryId() ======================= ini\n',
+        'categoryId => ', categoryId, '\n',
+        'userId => ', userId, '\n',
+        'validateCategoryId() ======================= fim');
+
+    return new Promise(async (resolve, reject) => {
+        if (isNaN(categoryId))
+            reject({ status: 405, message: 'Erro: Dados inválidos.' });
+        await Category.findByPk(categoryId)
+            .then(category => {
+                if (!category)
+                    reject({ status: 404, message: 'Erro: Categoria não localizada.' })
+                // Campos preenchidos corretamente
+                resolve({ category, userId });
+            })
+            .catch(err => reject(`Erro ao pesquisar categoria ==> [${err}]`));
+    })
+}
+
+// Verificar se tem acesso necessário no CFP para realizar a operação
+function verifyAccessAuditor({ category, userId }) {
+    debug(' verifyAccessAuditor() ======================= ini\n',
+        'category => ', category, '\n',
+        'userId => ', userId, '\n',
+        'verifyAccessAuditor() ======================= fim');
+
+    return new Promise(async (resolve, reject) => {
+        if (AccessRule.isAuditor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId))) {
+            debug('Acesso - ok')
+            resolve(category)
+        }
+        else
+            reject({ status: 403, message: 'Acesso negado.' });
+    })
+}
+
+//Recupera a soma do saldo das contas da categoria
+async function getBalance(category) {
+    debug(' getBalance() ======================= ini\n',
+        'category => ', category, '\n',
+        'getBalance() ======================= fim');
+
+    // Recuperar lista de contas da categoria
+    let accounts = []
+    accounts = await category.getAccCategory();
+    debug('Accounts => ', accounts)
+    let balances = []
+    balances = accounts.map(async account => Balance.getBalance(account.id));
+    // Aguarda todas as promisses carregadas no array balances
+    return Promise.all(balances)
+        .then(values => {
+            debug('Balances Mapped => ', balances);
+            return values.reduce((total, balance) => total + (balance !== null ? balance.value : 0), 0);
+        });
+}
+
+//Recupera a soma do saldo no mês das contas da categoria
+function getBalanceByMonth(category, yearMonth) {
+    debug(' getBalanceByMonth() ======================= ini\n',
+        'category => ', category, '\n',
+        'yearMonth => ', yearMonth, '\n',
+        'getBalanceByMonth() ======================= fim');
+
+    return new Promise(async (resolve, reject) => {
+        // TO-DO: VerifyYearMonthInvalid
+        try {
+            // Verifica se o mês informado é válido
+            let month = parseInt(yearMonth.substring(yearMonth.length - 2, yearMonth.length))
+            debug('month string => ', yearMonth.substring(yearMonth.length - 2, yearMonth.length), '\n',
+                'month parseInt => ', month);
+            if (isNaN(month) || month < 1 || month > 12)
+                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
+            // Verifica se o ano informado é válido, acima de 1900
+            let year = parseInt(yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2))
+            debug('year string => ', yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2), '\n',
+                'year parseInt => ', year);
+            if (isNaN(year) || year < 1900)
+                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
+        } catch (err) {
+            reject(`Erro ao validar yearMonth=${yearMonth} ==> [${err}]`);
+        }
+
+        // Recuperar lista de contas da categoria
+        let accounts = []
+        accounts = await category.getAccCategory();
+        debug('Accounts => ', accounts)
+        let balances = []
+        balances = accounts.map(async account => Balance.getBalanceByYearMonth(account.id, yearMonth));
+        // Aguarda todas as promisses carregadas no array balances
+        resolve(Promise.all(balances)
+            .then(values => {
+                debug('Balances Mapped => ', balances);
+                return values.reduce((total, balance) => total + (balance !== null ? balance.value : 0), 0);
+            })
+        );
+    })
+}
+
 // Cadastra categoria
 exports.addCategory = async function (req, res) {
     debug(' addCategory() ======================= ini\n',
@@ -313,6 +416,41 @@ exports.listAccountByCategoryId = function (req, res) {
     })
 }
 
+// Obtém a soma do saldo final das contas da categoria
+exports.getCategoryBalance = async function (req, res) {
+    debug(' getCategoryBalance() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'getCategoryBalance() ======================= fim');
+
+    await validateCategoryId(req.params.id, req.decoded.id)
+        .then(verifyAccessAuditor)
+        .then(getBalance)
+        .then(balance => {
+            debug('Balance => ', balance)
+            res.status(200).send({ value: balance })
+        })
+        .catch(err => returnErr(err, res))
+}
+
+// Obtém a soma do saldo no mês das contas da categoria
+exports.getCategoryBalanceByMonth = async function (req, res) {
+    debug(' getCategoryBalanceByMonth() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'getCategoryBalanceByMonth() ======================= fim');
+
+    await validateCategoryId(req.params.id, req.decoded.id)
+        .then(verifyAccessAuditor)
+        .then(category => getBalanceByMonth(category, req.params.yearMonth))
+        .then(balance => {
+            debug('Category Balance by Month => ', balance)
+            res.status(200).send({ value: balance })
+        })
+        .catch(err => returnErr(err, res))
+}
 
 const debug = (...msg) => {
     if ((process.env.DEBUG || 'false') == 'true')

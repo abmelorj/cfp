@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment'
 import { CFPService } from 'src/app/services/cfp.service';
+import { Balance } from 'src/app/models/balance.interface'
 import { Category } from 'src/app/models/category.interface';
 
 @Injectable({
@@ -22,6 +23,14 @@ export class CategoryService {
   getCategoryById(id: number): Observable<Category> {
     return this.http
       .get<Category>(`${environment.api}/categories/${id}`)
+  }
+
+  getCategoryBalance(id: number): Observable<Balance> {
+    return this.http.get<Balance>(`${environment.api}/categories/${id}/balance`)
+  }
+
+  getCategoryBalanceByMonth(id: number): Observable<Balance> {
+    return this.http.get<Balance>(`${environment.api}/categories/${id}/balance/${this.cfp.yearMonth}`)
   }
 
   addCategory(category: Category): Observable<Category> {

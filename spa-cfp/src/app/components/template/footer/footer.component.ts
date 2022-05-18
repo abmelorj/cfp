@@ -1,12 +1,12 @@
 import { CFPService } from './../../../services/cfp.service';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, DoCheck } from '@angular/core';
 
 @Component({
   selector: 'app-footer',
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.css']
 })
-export class FooterComponent implements OnInit {
+export class FooterComponent implements DoCheck {
 
   @Input() shallValue: number = 0;
   @Input() balanceValue: number = 0;
@@ -14,7 +14,7 @@ export class FooterComponent implements OnInit {
 
   constructor(private cfpService: CFPService) { }
 
-  ngOnInit(): void {
+  ngDoCheck(): void {
     this.updateValues()
   }
 
