@@ -1,5 +1,5 @@
 import { CFPService } from './../../services/cfp.service';
-import { Component, OnInit, OnChanges, SimpleChanges, DoCheck } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { FormControl } from '@angular/forms';
 import { MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
@@ -49,19 +49,13 @@ export const MY_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
   ]
 })
-export class MonthComponent implements OnInit, OnChanges, DoCheck {
+export class MonthComponent implements OnInit {
   date = new FormControl(moment());
 
   constructor(private cfpService: CFPService) { }
 
   ngOnInit(): void {
     this.cfpService.yearMonth = this.getYearMonth();
-  }
-
-  ngOnChanges(_changes: SimpleChanges): void {
-  }
-
-  ngDoCheck(): void {
   }
 
   refreshViews(): void {

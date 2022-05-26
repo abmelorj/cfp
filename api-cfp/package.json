@@ -9,7 +9,7 @@
     "predev": "env-cmd -f ./config/.env.dev node src/database/dbload.js",
     "dev": "env-cmd -f ./config/.env.dev node src/server.js",
     "predev-mon": "env-cmd -f ./config/.env.dev node src/database/dbload.js",
-    "dev-mon": "env-cmd -f ./config/.env.dev nodemon src/server.js",
+    "dev-mon": "env-cmd -f ./config/.env.dev nodemon --trace-warnings src/server.js",
     "pretest": "env-cmd -f ./config/.env.test node src/database/dbload.js",
     "pretestc": "env-cmd -f ./config/.env.test node src/database/dbload.js",
     "pretesto": "env-cmd -f ./config/.env.test node src/database/dbload.js",

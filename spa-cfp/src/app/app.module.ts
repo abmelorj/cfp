@@ -44,6 +44,9 @@ import { AccessGrantOpenComponent } from './views/access-grant/access-grant-open
 import { AccountListComponent } from './views/account/account-list/account-list.component';
 import { AccountCreateComponent } from './views/account/account-create/account-create.component';
 import { AccountUpdateComponent } from './views/account/account-update/account-update.component';
+import { OperationListComponent } from './views/operation/operation-list/operation-list.component';
+import { OperationCreateComponent } from './views/operation/operation-create/operation-create.component';
+import { OperationUpdateComponent } from './views/operation/operation-update/operation-update.component';
 
 @NgModule({
   declarations: [
@@ -66,6 +69,9 @@ import { AccountUpdateComponent } from './views/account/account-update/account-u
     AccountListComponent,
     AccountCreateComponent,
     AccountUpdateComponent,
+    OperationListComponent,
+    OperationCreateComponent,
+    OperationUpdateComponent,
   ],
   imports: [
     BrowserModule,

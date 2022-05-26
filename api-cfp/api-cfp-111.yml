@@ -1,7 +1,7 @@
 openapi: 3.0.3
 
 info:
-  version: 1.1.0
+  version: 1.1.1
   title: API-CFP
   description: >-
     Esta API está sendo desenvolvida como parte do trabalho de conclusão do
@@ -1201,7 +1201,7 @@ paths:
         - APIKeySecurityScheme: []
       tags:
         - operations
-      summary: Registra operação de agendamento de despesa ainda sem definição da conta de recurso financeiro que será usada na liquidação
+      summary: Registra operação de agendamento de despesa, sem defir a conta de recurso financeiro que será usada na liquidação
       operationId: forecastOperation
       responses:
         201:
@@ -1864,6 +1864,10 @@ components:
     Operation:
       type: object
       properties:
+        oprTypeId:
+          description: Identificador do tipo de operação
+          type: integer
+          format: int32
         oprSourceAccountId:
           description: Conta de origem da operação, indeterminado nas operações de receber crédito e reservar valor.
           type: integer
@@ -1877,6 +1881,10 @@ components:
           description: Identificador da operação
           type: integer
           format: int64
+        description:
+          description: Descrição da operação realizada.
+          type: string
+          example: Crédito de salário na conta corrente.
         oprDate:
           description: Data da operação
           type: string

@@ -5,14 +5,23 @@ const db = require('./../database/db');
 
 class Category extends Model {
 
-    static async findByNameAndOwnerId(name, catOwnerId) {
-        return Category.findOne({ where: { name, catOwnerId } })
+    static async findByNameAndOwnerId(name, catOwnerId, transaction) {
+        return Category.findOne({
+            where: { name, catOwnerId },
+            transaction
+        })
             .then(category => category, reason => reason)
             .catch(err => err);
     }
 
-    static async findByOwnerId(catOwnerId) {
-        return Category.findAll({ where: { catOwnerId } })
+    static async findByOwnerId(catOwnerId, transaction) {
+        return Category.findAll({
+            where: { catOwnerId },
+            order: [
+                ['name', 'ASC']
+            ],
+            transaction
+        })
             .then(categories => categories, reason => reason)
             .catch(err => err);
     }

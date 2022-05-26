@@ -1,14 +1,188 @@
 'use strict';
 require('dotenv').config();
+const service = require('../models/service');
+const util = require('../models/util');
+const logerr = require('../config/logerr');
+const loginfo = require('../config/loginfo');
+const db = require('./../database/db');
+const { Op } = require('sequelize');
+
 
 const AccessGrant = require('../models/AccessGrant');
 const AccessRule = require('../models/AccessRule');
 const Account = require('../models/Account');
-const Category = require('../models/Category');
-const logerr = require('../config/logerr');
-const loginfo = require('../config/loginfo');
 const Balance = require('../models/Balance');
+const Category = require('../models/Category');
+const Operation = require('../models/Operation');
+const Payment = require('../models/Payment');
+const Shall = require('../models/Shall');
 
+/*************************************************************
+ * 
+ ************************************************************/
+exports.listAccountOperationByMonth = async function (req, res) {
+    util.debug(' listAccountOperationByMonth() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'listAccountOperationByMonth() ======================= fim');
+
+    let userId = req.decoded.id;
+    let accountId = req.params.id;
+    let yearMonth = req.params.yearMonth;
+    await service.verifyAccountId(accountId)
+        .then(async account => service.verifyAuditorAccessByAccount({ account, userId }))
+        .then(async accountGranted => {
+            if (!accountGranted)
+                return res.status(405).send({ message: `Erro ao tentar localizar operações da conta: [${accountId}]` });
+            // Recupera operações
+            let operations = await Operation.listOperationByAccountIdYearMonth(accountId, yearMonth);
+            res.status(200).send(operations)
+        })
+        .catch(err => util.returnErr(err.message, res));
+}
+
+/*************************************************************
+ * Retorna o valor pendente de pagamento nas contas de débito, 
+ * crédito ou cartão de crédito até o mês informado.
+ ************************************************************/
+exports.getAccountPendingValueByMonth = async function (req, res) {
+    util.debug(' getAccountPendingValueByMonth() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'getAccountPendingValueByMonth() ======================= fim');
+
+    /******************************************
+     * - Conta de reserva ou cartão de crédito (isCredit),
+     *   apurar obrigações pendentes associadas às operações no mês.
+     * - Conta de débito (!isCredit),
+     *   apurar pagamentos pendentes no mês.
+     *****************************************/
+    let userId = req.decoded.id;
+    let accountId = req.params.id;
+    let yearMonth = req.params.yearMonth;
+    await service.verifyAccountId(accountId)
+        .then(async account => service.verifyAuditorAccessByAccount({ account, userId }))
+        .then(async accountGranted => {
+            if (!accountGranted)
+                return res.status(405).send({ message: `Erro ao tentar localizar valor pendente da conta: [${accountId}]` });
+
+            // Verifica como vai apurar o valor pendente
+            if (accountGranted.isCredit) {
+                // Para as contas de crédito e cartão de crédito, apura pela entidade Shall
+                let arrayPendingValue = await getPendingValueByAccountIdYearMonth(accountGranted.id, yearMonth);
+                let objPendingValue = arrayPendingValue[0];
+                res.status(200).send(objPendingValue);
+            } else {
+                // Para as contas de débito, apura pela entidade Payment
+                let pendingValue = await Payment.getPendingValueByAccountIdYearMonth(accountGranted.id, yearMonth);
+                res.status(200).send({ pendingValue });
+            }
+        })
+        .catch(err => util.returnErr(err.message, res));
+}
+
+/****************************************************
+ * Obter o valor de obrigações pendentes para uma 
+ * conta até determinado mês.
+ ***************************************************/
+async function getPendingValueByAccountIdYearMonth(accountId, yearMonth, transaction) {
+    return Operation.findAll({
+        attributes: [
+            [db.fn('SUM', db.col('shaOperation.value')), 'pendingValue']
+        ],
+        where: {
+            [Op.or]: [
+                { oprSourceAccountId: accountId },
+                { oprDestinyAccountId: accountId }
+            ]
+        },
+        include: {
+            model: Shall,
+            as: 'shaOperation',
+            require: true,
+            attributes: [],
+            where: {
+                [Op.and]: [
+                    { isPending: true },
+                    { shaDate: { [Op.lt]: util.firstDayNextYearMonth(yearMonth) } }
+                ]
+            },
+            transaction
+        },
+        transaction
+    });
+}
+/*************************************************************
+* Retorna o valor pendente de pagamento nas contas de débito, 
+* crédito ou cartão de crédito.
+************************************************************/
+exports.getAccountPendingValue = async function (req, res) {
+    util.debug(' getAccountPendingValue() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'getAccountPendingValue() ======================= fim');
+
+    /******************************************
+     * - Conta de reserva ou cartão de crédito (isCredit),
+     *   apurar obrigações pendentes associadas às operações no mês.
+     * - Conta de débito (!isCredit),
+     *   apurar pagamentos pendentes no mês.
+     *****************************************/
+    let userId = req.decoded.id;
+    let accountId = req.params.id;
+    await service.verifyAccountId(accountId)
+        .then(async account => service.verifyAuditorAccessByAccount({ account, userId }))
+        .then(async accountGranted => {
+            if (!accountGranted)
+                return res.status(405).send({ message: `Erro ao tentar localizar valor pendente da conta: [${accountId}]` });
+
+            // Verifica como vai apurar o valor pendente
+            if (accountGranted.isCredit) {
+                // Para as contas de crédito e cartão de crédito, apura pela entidade Shall
+                let arrayPendingValue = await getPendingValueByAccountId(accountGranted.id);
+                let objPendingValue = arrayPendingValue[0];
+                res.status(200).send(objPendingValue);
+            } else {
+                // Para as contas de débito, apura pela entidade Payment
+                let pendingValue = await Payment.getPendingValueByAccountId(accountGranted.id);
+                res.status(200).send({ pendingValue });
+            }
+        })
+        .catch(err => util.returnErr(err.message, res));
+}
+
+/****************************************************
+ * Obter o valor de obrigações pendentes para uma conta.
+ ***************************************************/
+async function getPendingValueByAccountId(accountId, transaction) {
+    return Operation.findAll({
+        attributes: [
+            [db.fn('SUM', db.col('shaOperation.value')), 'pendingValue']
+        ],
+        where: {
+            [Op.or]: [
+                { oprSourceAccountId: accountId },
+                { oprDestinyAccountId: accountId }
+            ]
+        },
+        include: {
+            model: Shall,
+            as: 'shaOperation',
+            require: true,
+            attributes: [],
+            where: { isPending: true },
+            transaction
+        },
+        transaction
+    });
+}
+
+/*************************************************************
+ * 
+ ************************************************************/
 exports.getAccountBalanceByMonth = async function (req, res) {
     debug(' getAccountBalanceByMonth() ======================= ini\n',
         'req.body => ', req.body, '\n',
@@ -25,6 +199,9 @@ exports.getAccountBalanceByMonth = async function (req, res) {
         .catch(err => returnErr(err, res))
 }
 
+/*************************************************************
+ * 
+ ************************************************************/
 exports.getAccountBalance = async function (req, res) {
     debug(' getAccountBalance() ======================= ini\n',
         'req.body => ', req.body, '\n',
@@ -40,6 +217,9 @@ exports.getAccountBalance = async function (req, res) {
         .catch(err => returnErr(err, res))
 }
 
+/*************************************************************
+ * 
+ ************************************************************/
 exports.getAccountById = async function (req, res) {
     debug(' getAccountById() ======================= ini\n',
         'req.body => ', req.body, '\n',
@@ -52,6 +232,9 @@ exports.getAccountById = async function (req, res) {
         .catch(err => returnErr(err, res))
 }
 
+/*************************************************************
+ * 
+ ************************************************************/
 exports.addAccount = async function (req, res) {
     debug(' addAccount() ======================= ini\n',
         'req.body => ', req.body, '\n',
@@ -69,6 +252,9 @@ exports.addAccount = async function (req, res) {
         .catch(err => returnErr(err, res))
 }
 
+/*************************************************************
+ * 
+ ************************************************************/
 exports.listAccountByOwnerId = async function (req, res) {
     debug(' listAccountByOwnerId() ======================= ini\n',
         'req.params.id => ', req.params.id, '\n',
@@ -82,7 +268,6 @@ exports.listAccountByOwnerId = async function (req, res) {
                 debug('Accounts => ', accounts)
                 accounts = accounts.map(account => account.dataValues);
                 debug('Accounts Mapped => ', accounts)
-                //res.status(200).send(accounts !== undefined ? accounts.dataValues : [{}])
                 res.status(200).send(accounts);
             })
             .catch(err => returnErr(err, res))
@@ -95,6 +280,9 @@ exports.listAccountByOwnerId = async function (req, res) {
 // ==============================================================
 // Exclui conta
 // ==============================================================
+/*************************************************************
+ * 
+ ************************************************************/
 exports.deleteAccountById = async function (req, res) {
     debug(' deleteAccountById() ======================= ini\n',
         'req.body => ', req.body, '\n',
@@ -116,6 +304,9 @@ exports.deleteAccountById = async function (req, res) {
 // ==============================================================
 // Atualiza conta
 // ==============================================================
+/*************************************************************
+ * 
+ ************************************************************/
 exports.updateAccount = async function (req, res) {
     debug(' updateAccount() ======================= ini\n',
         'req.body => ', req.body, '\n',
@@ -411,7 +602,7 @@ function validateFields(account, userId) {
         // conta de cartão de crédito                 true      true      reserva financeira (especial)
         // conta de recurso financeiro                false     false     recurso financeiro
         if (account.isCard && !account.isCredit)
-            reject({ satus: 405, message: `Erro: Dados incompatíveis - reserva(${account.isCredit}) x cartão de crédito(${account.isCard}).` });
+            reject({ status: 405, message: `Erro: Dados incompatíveis - reserva(${account.isCredit}) x cartão de crédito(${account.isCard}).` });
 
         // Campos preenchidos corretamente, falta verificar se está na categoria adequada (vide: verifyCategoryCompliance)
         resolve({ account, userId });

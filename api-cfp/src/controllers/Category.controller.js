@@ -8,7 +8,6 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const logerr = require('../config/logerr');
 const loginfo = require('../config/loginfo');
-const { getBalanceByYearMonth } = require('../models/Balance');
 
 // Validar preenchimento de name, catOwnerId e isCredit
 function validateNameOwnerCredit(category) {
@@ -410,6 +409,20 @@ exports.listAccountByCategoryId = function (req, res) {
                 debug('Accounts => ', accounts)
                 accounts = accounts.map(account => account.dataValues);
                 debug('Accounts Mapped => ', accounts)
+                // Ordena as contas por nome, usa normalize para desconsiderar acentuação
+                accounts = await accounts.sort((a, b) => {
+                    let fa = a.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+                        fb = b.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+                    if (fa < fb) {
+                        return -1;
+                    }
+                    if (fa > fb) {
+                        return 1;
+                    }
+                    return 0;
+                });
+                console.log('================ Accounts => ', accounts);
                 resolve(res.status(200).send(accounts));
             })
             .catch(err => reject(returnErr(`Erro ao buscar categoria ==> [${err}]`, res)));

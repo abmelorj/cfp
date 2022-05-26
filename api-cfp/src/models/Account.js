@@ -6,26 +6,31 @@ const Category = require('./Category');
 
 class Account extends Model {
 
-    static async findByNameAndOwnerId(name, catOwnerId) {
+    static async findByNameAndOwnerId(name, catOwnerId, transaction) {
         return Account.findOne({
             where: { name },
             include: {
                 model: Category,
                 as: 'accCategory',
                 where: { catOwnerId }
-            }
+            },
+            transaction: transaction
         })
             .then(account => account, reason => reason)
             .catch(err => err);
     }
 
-    static async findByOwnerId(catOwnerId) {
+    static async findByOwnerId(catOwnerId, transaction) {
         return Account.findAll({
             include: {
                 model: Category,
                 as: 'accCategory',
                 where: { catOwnerId }
-            }
+            },
+            order: [
+                ['name', 'ASC']
+            ],
+            transaction: transaction
         })
             .then(accounts => accounts, reason => reason)
             .catch(err => err);

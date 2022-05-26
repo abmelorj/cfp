@@ -36,7 +36,7 @@ export class AccountListComponent implements OnInit, AfterContentChecked, DoChec
     // Recupera categoria pelo Id na rota
     categoryService.getCategoryById(parseInt(this.categoryId))
       .subscribe(category => {
-        cfpService.category = category;
+        cfpService.setCategory(category);
         this.categoryName = this.cfpService.category.name;
       }
         , err => cfpService.showMessage(err));
@@ -73,8 +73,6 @@ export class AccountListComponent implements OnInit, AfterContentChecked, DoChec
           account.balanceByMonth$ = this.accountService.getAccountBalanceByMonth(account.id || 0);
           return account;
         })));
-      console.log('loadAccounts...');
-      console.log('this.accounts$ ==> ', this.accounts$);
       // Calcula os saldos
       this.calculateBalances();
       resolve(true);

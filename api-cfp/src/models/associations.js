@@ -281,7 +281,7 @@ Account.hasMany(Payment, {
 // PayShall -> Shall
 // ==================================================
 PayShall.belongsTo(Shall, {
-    as: 'shall',
+    as: 'sha',
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     foreignKey: {
@@ -292,7 +292,7 @@ PayShall.belongsTo(Shall, {
     }
 });
 Shall.hasMany(PayShall, {
-    as: 'shall',
+    as: 'sha',
     foreignKey: 'shallId'
 });
 
@@ -300,7 +300,7 @@ Shall.hasMany(PayShall, {
 // PayShall -> Payment
 // ==================================================
 PayShall.belongsTo(Payment, {
-    as: 'payment',
+    as: 'pay',
     onDelete: 'CASCADE',
     onUpdate: 'CASCADE',
     foreignKey: {
@@ -311,6 +311,6 @@ PayShall.belongsTo(Payment, {
     }
 });
 Payment.hasMany(PayShall, {
-    as: 'payment',
+    as: 'pay',
     foreignKey: 'paymentId'
 });

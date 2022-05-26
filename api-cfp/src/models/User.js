@@ -5,8 +5,8 @@ const db = require('./../database/db');
 
 class User extends Model {
 
-    static async findByEmail(email) {
-        return User.findOne({ where: { email } })
+    static async findByEmail(email, transaction) {
+        return User.findOne({ where: { email }, transaction })
             .then(user => user, reason => reason)
             .catch(err => err);
     }

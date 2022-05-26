@@ -21,7 +21,7 @@ export class CategoryCreateComponent {
     private categoryService: CategoryService
   ) {
     // Inicializa ou recupera a última aba visível
-    this.tabIndex = cfpService.categoryComponent?.categoryTabIndex || 0;
+    this.tabIndex = cfpService.getCategoryTabIndex();
     if (this.tabIndex == 0)
       this.placeHolderText = 'Reserva financeira'
     else

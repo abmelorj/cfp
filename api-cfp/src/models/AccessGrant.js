@@ -5,38 +5,42 @@ const db = require('./../database/db');
 
 class AccessGrant extends Model {
 
-    static async findByOwnerId(agOwnerId) {
+    static async findByOwnerId(agOwnerId, transaction) {
         return AccessGrant.findAll({
             where: { agOwnerId, endDate: null },
-            include: ['agAccessRule', 'agOwner', 'agGrantedUser']
+            include: ['agAccessRule', 'agOwner', 'agGrantedUser'],
+            transaction: transaction
         })
             .then(grants => grants, reason => reason)
             .catch(err => err);
     }
 
-    static async findByGrantedUserId(agGrantedUserId) {
+    static async findByGrantedUserId(agGrantedUserId, transaction) {
         return AccessGrant.findAll({
             where: { agGrantedUserId, endDate: null },
-            include: ['agAccessRule', 'agOwner', 'agGrantedUser']
+            include: ['agAccessRule', 'agOwner', 'agGrantedUser'],
+            transaction: transaction
         })
             .then(granted => granted, reason => reason)
             .catch(err => err);
     }
 
-    static async findGrantByIds(agOwnerId, agGrantedUserId, agAccessRuleId) {
+    static async findGrantByIds(agOwnerId, agGrantedUserId, agAccessRuleId, transaction) {
         return AccessGrant.findAll({
-            where: { agOwnerId, agGrantedUserId, agAccessRuleId, endDate: null }
+            where: { agOwnerId, agGrantedUserId, agAccessRuleId, endDate: null },
+            transaction: transaction
         })
             .then(granted => granted, reason => reason)
             .catch(err => err);
     }
 
 
-    static getUserProfileInOwnerCFP(agGrantedUserId, agOwnerId) {
+    static getUserProfileInOwnerCFP(agGrantedUserId, agOwnerId, transaction) {
         return new Promise(async (resolve, reject) => {
             await AccessGrant.findOne({
                 attributes: [[Sequelize.fn('min', Sequelize.col('agAccessRuleId')), 'agAccessRuleId']],
-                where: { agGrantedUserId, agOwnerId, endDate: null }
+                where: { agGrantedUserId, agOwnerId, endDate: null },
+                transaction: transaction
             })
                 // agAccessRuleId   Perfil
                 //              1 = Proprietário

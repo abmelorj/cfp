@@ -50,7 +50,8 @@ async function loadOperationTypes() {
     await insertIfNotExistOperationType(4, 'Transferir reserva', 'Transferir valor entre contas de reserva financeira');
     await insertIfNotExistOperationType(5, 'Pagar à vista', 'Registrar pagamento à vista');
     await insertIfNotExistOperationType(6, 'Pagar com cartão de crédito', 'Registrar pagamento efetuado com cartão de crédito');
-    await insertIfNotExistOperationType(7, 'Agendar pagamento', 'Registrar previsão de pagamento a ser liquidado em data futura');
+    await insertIfNotExistOperationType(7, 'Agendar pagamento', 'Registrar pagamento a ser liquidado em data futura');
+    await insertIfNotExistOperationType(8, 'Agendar despesa', 'Registrar previsão de pagamento a ser liquidado em data futura');
 }
 
 async function insertIfNotExistOperationType(id, name, description = name) {

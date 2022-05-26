@@ -4,6 +4,7 @@ const { Model, DataTypes } = require('sequelize');
 const db = require('./../database/db');
 
 class Shall extends Model {
+
 }
 
 Shall.init({
