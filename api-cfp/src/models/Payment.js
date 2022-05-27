@@ -10,12 +10,13 @@ const PayShall = require('./PayShall');
 const Shall = require('./Shall');
 
 class Payment extends Model {
+
     /***********************************************
      * Exclusão de pagamento implica em:
      * - reverter os saldos (balance) envolvidos na operação;
      * - retornar as obrigações (shall) para pendente de pagamento.
      **********************************************/
-    static async delete(payment, transaction) {
+    static async delete(payment, transaction, destroy = true) {
         return new Promise(async (resolve, reject) => {
             // Se o pagamento já estava liquidado (pagamento efetuado)...
             if (!payment.isPending) {
@@ -38,7 +39,8 @@ class Payment extends Model {
                             model: Operation,
                             as: 'shaOperation',
                             required: true
-                        }]
+                        }],
+                        transaction
                     }],
                     transaction
                 });
@@ -51,7 +53,7 @@ class Payment extends Model {
                  * Estornar também o valor da obrigação na conta de débito
                  * utilizada para pagamento.
                  * 
-                 * Regras para estornar cada shall.value na payment.payDate:
+                 * Regras para estornar cada shall.value na shall.shaDate:
                  *   6 - estornar débitos na operation.oprDestinyAccount e payment.payDebitAccount
                  *   7 - estornar débitos na operation.oprSourceAccount e payment.payDebitAccount
                  *   8 - estornar débitos na operation.oprSourceAccount e payment.payDebitAccount
@@ -63,7 +65,7 @@ class Payment extends Model {
                             // estornar valor pendente para o cartão
                             await Balance.updateBalanceAddDestiny({
                                 oprDestinyAccountId: payShall.sha.shaOperation.oprDestinyAccountId,
-                                oprDate: payment.payDate,
+                                oprDate: payShall.sha.shaDate,
                                 value: payShall.sha.value
                             }, transaction);
                             break;
@@ -72,7 +74,7 @@ class Payment extends Model {
                             // estornar valor para a conta de reserva financeira
                             await Balance.updateBalanceAddDestiny({
                                 oprDestinyAccountId: payShall.sha.shaOperation.oprSourceAccountId,
-                                oprDate: payment.payDate,
+                                oprDate: payShall.sha.shaDate,
                                 value: payShall.sha.value
                             }, transaction);
                             break;
@@ -93,8 +95,13 @@ class Payment extends Model {
                 }, transaction);
 
             } // !payment.isPending
-            // EXCLUI o registro de pagamento, pendente ou efetivado.
-            await payment.destroy({ transaction });
+
+            // Se destroy não foi informado, assume verdadeiro como default.
+            if (destroy) {
+                // EXCLUI o registro de pagamento, pendente ou efetivado.
+                await payment.destroy({ transaction });
+            }
+
             resolve(true);
         }).catch(err => reject(err.message));
     }

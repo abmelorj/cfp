@@ -1490,6 +1490,9 @@ paths:
         404:
           description: Pagamento não localizado
           content: {}
+        405:
+          description: "Erro: Operação não permitida."
+          content: {}
       requestBody:
         $ref: "#/components/requestBodies/Payment"
 
@@ -1536,7 +1539,7 @@ paths:
           description: "Erro: Dados inválidos."
           content: {}
       requestBody:
-        $ref: "#/components/requestBodies/Payment"
+        $ref: "#/components/requestBodies/PaymentShall"
 
   /api/payments/{id}/payup:
     put:
@@ -1975,6 +1978,34 @@ components:
           description: Versão do registro para o controle de update
           type: string
           format: date-time
+    # PaymentShall ----------------------------------------
+    PaymentShall:
+      type: object
+      properties:
+        shallId:
+          description: Identificador da obrigação a ser paga
+          type: integer
+          format: int64
+          example: 93457
+        payDebitAccountId:
+          description: Identificador da conta de recurso financeiro utilizada no pagamento da despesa
+          type: integer
+          format: int32
+          example: 025
+        payDate:
+          description: Data do pagamento
+          type: string
+          format: date
+          example: 2021-12-20
+        value:
+          description: Valor pago
+          type: number
+          format: float
+          example: 55.93
+        version:
+          description: Versão do registro para o controle de update
+          type: string
+          format: date-time
     # Value -----------------------------------------------
     Value:
       type: object
@@ -2066,6 +2097,14 @@ components:
           schema:
             $ref: "#/components/schemas/Payment"
       description: Pagamento de obrigação gerada por operação com agendamento de pagamento.
+      required: true
+    # PaymentShall ----------------------------------------
+    PaymentShall:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/PaymentShall"
+      description: Dados para pagamento de obrigação.
       required: true
   #--------------------------------------------------------#
   #  S E C U R I T Y    S C H E M E S                      #

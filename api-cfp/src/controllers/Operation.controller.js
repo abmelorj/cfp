@@ -33,7 +33,7 @@ exports.creditOperation = async function (req, res) {
                 return util.returnErr(err, res)
             }
             // Fim da Transação!
-            return res.status(200).send({ message: `Crédito de ${util.currency(req.body.value)} registrado na conta [${account.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
+            return res.status(201).send({ message: `Crédito de ${util.currency(req.body.value)} registrado na conta [${account.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
         })
         .catch(err => {
             util.returnErr(err, res)
@@ -107,7 +107,7 @@ exports.transferOperation = async function (req, res) {
                 return util.returnErr(err, res)
             }
             // Fim da Transação!
-            return res.status(200).send({ message: `Realizada transferência de ${util.currency(req.body.value)} da conta [${accounts.sourceAccount.name}] para a conta [${accounts.destinyAccount.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
+            return res.status(201).send({ message: `Realizada transferência de ${util.currency(req.body.value)} da conta [${accounts.sourceAccount.name}] para a conta [${accounts.destinyAccount.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
         })
         .catch(err => util.returnErr(err, res))
 
@@ -159,7 +159,7 @@ exports.forecastOperation = async function (req, res) {
             // Fim da Transação!
             let qty = parseInt(req.body.qtyPayments);
             let strDate = util.strBrlDateToString(req.body.startDate || req.body.oprDate);
-            return res.status(200).send({ message: `Realizada previsão de pagamento de ${util.currency(req.body.value)} usando a reserva financeira [${sourceAccount.name}] ${qty == 1 ? 'em' : 'a partir de'} ${strDate}${qty == 1 ? '' : ' dividido em ' + req.body.qtyPayments + ' parcelas mensais'}.` });
+            return res.status(201).send({ message: `Realizada previsão de pagamento de ${util.currency(req.body.value)} usando a reserva financeira [${sourceAccount.name}] ${qty == 1 ? 'em' : 'a partir de'} ${strDate}${qty == 1 ? '' : ' dividido em ' + req.body.qtyPayments + ' parcelas mensais'}.` });
         })
         .catch(err => util.returnErr(err, res))
 }
@@ -247,7 +247,7 @@ exports.payOperation = async function (req, res) {
             // Fim da Transação!
             let qty = parseInt(req.body.qtyPayments || '1');
             let strDate = util.strBrlDateToString(req.body.startDate || req.body.oprDate);
-            return res.status(200).send({
+            return res.status(201).send({
                 message: `Realizado pagamento ${req.body.oprTypeId === 7 ? 'agendado ' : ''}de ${util.currency(req.body.value)} usando a reserva financeira [${accounts.sourceAccount.name}] com valor disponível em [${accounts.destinyAccount.name}] ${qty == 1 ? 'em' : 'a partir de'} ${strDate}${qty == 1 ? '' : ' dividido em ' + req.body.qtyPayments + ' parcelas mensais'}.`
             });
         })
@@ -390,7 +390,7 @@ exports.updateOperationById = async function (req, res) {
             // Inicio da transação...
             try {
                 await db.transaction(async transaction => {
-                    // Recupera Operação...
+                    // Verifica versão da Operação a ser alterada...
                     let operation = await Operation.findByPk(operationId);
                     if (operation.version.getTime() !== operationVersion.getTime())
                         return util.returnErr({ status: 403, message: `Não foi possível excluir o registro da operação porque o dado estava defasado. [${JSON.stringify(operation.version).replace(/\"/g, '')} <> ${JSON.stringify(operationVersion).replace(/\"/g, '')}]` }, res);
