@@ -7,7 +7,10 @@ const logerr = require('../config/logerr');
 
 exports.returnErr = function (err, res) {
     if (!err.status)
-        return res.status(500).send(logerr(err))
+        if (!err.message)
+            return res.status(500).send(logerr(err))
+        else
+            return res.status(500).send(logerr(err.message))
     else
         return res.status(err.status).send(logerr(err.message));
 }

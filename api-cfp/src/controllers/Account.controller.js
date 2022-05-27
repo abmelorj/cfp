@@ -39,7 +39,7 @@ exports.listAccountOperationByMonth = async function (req, res) {
             let operations = await Operation.listOperationByAccountIdYearMonth(accountId, yearMonth);
             res.status(200).send(operations)
         })
-        .catch(err => util.returnErr(err.message, res));
+        .catch(err => util.returnErr(err, res));
 }
 
 /*************************************************************
@@ -80,7 +80,7 @@ exports.getAccountPendingValueByMonth = async function (req, res) {
                 res.status(200).send({ pendingValue });
             }
         })
-        .catch(err => util.returnErr(err.message, res));
+        .catch(err => util.returnErr(err, res));
 }
 
 /****************************************************
@@ -151,7 +151,7 @@ exports.getAccountPendingValue = async function (req, res) {
                 res.status(200).send({ pendingValue });
             }
         })
-        .catch(err => util.returnErr(err.message, res));
+        .catch(err => util.returnErr(err, res));
 }
 
 /****************************************************

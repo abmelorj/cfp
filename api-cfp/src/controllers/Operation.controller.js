@@ -400,12 +400,12 @@ exports.updateOperationById = async function (req, res) {
                     await doNewOperation(req, transaction);
                 });// Commit
             } catch (err) { // RollBack
-                return util.returnErr(err.message, res);
+                return util.returnErr(err, res);
             };
             // Fim da Transação!
             return res.status(200).send({ message: 'Operação alterada!' });
         })
-        .catch(err => util.returnErr(err.message, res));
+        .catch(err => util.returnErr(err, res));
 
 }
 
@@ -470,12 +470,12 @@ exports.deleteOperationById = async function (req, res) {
                     await Operation.delete(operation, transaction);
                 });// Commit
             } catch (err) { // RollBack
-                return util.returnErr(err.message, res);
+                return util.returnErr(err, res);
             };
             // Fim da Transação!
             return res.status(200).send({ message: 'Operação excluída!' });
         })
-        .catch(err => util.returnErr(err.message, res));
+        .catch(err => util.returnErr(err, res));
 
 }
 

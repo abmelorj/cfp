@@ -17,17 +17,72 @@ exports.payupPayment = async function (req, res) {
 }
 
 /*************************************************
- * 
+ * Lista as obrigações associadas a um pagamento.
  ************************************************/
 exports.listShallByPaymentId = async function (req, res) {
-    res.status(200).send({ message: 'TO-DO' });
+    util.debug(' listShallByPaymentId() ======================= ini\n',
+        'req.body    => ', req.body, '\n',
+        'req.decoded => ', req.decoded, '\n',
+        'req.params  => ', req.params, '\n',
+        'req.url     => ', req.url, '\n',
+        'req.method  => ', req.method, '\n',
+        'listShallByPaymentId() ======================= fim');
+
+    let paymentId = req.params.id;
+    let userId = req.decoded.id;
+    await service.verifyPaymentId(paymentId)
+        .then(async payment => service.verifyAccountId(payment.payDebitAccountId))
+        .then(async account => service.verifyAuditorAccessByAccount({ account, userId }))
+        .then(async accountGranted => {
+            if (!accountGranted)
+                return res.status(405).send({ message: `Erro ao localizar obrigações do pagamento: [${paymentId}]` });
+            // Recupera obrigações associadas ao pagamento...
+            let paymentShalls = await Payment.findAll({
+                // attributes: ['pay'],
+                where: { id: paymentId },
+                include: [{
+                    model: PayShall,
+                    as: 'pay',
+                    required: true,
+                    // attributes: ['sha'],
+                    include: [{
+                        model: Shall,
+                        as: 'sha',
+                        required: true,
+                        attributes: ['id', 'shallNr', 'shaDate', 'value', 'isPending', 'version']
+                    }]
+                }]
+            });
+            return res.status(200).send(paymentShalls[0].pay.map(payshall => payshall.sha));
+        })
+        .catch(err => util.returnErr(err, res));
 }
 
 /*************************************************
  * 
  ************************************************/
 exports.getPaymentById = async function (req, res) {
-    res.status(200).send({ message: 'TO-DO' });
+    util.debug(' getPaymentById() ======================= ini\n',
+        'req.body    => ', req.body, '\n',
+        'req.decoded => ', req.decoded, '\n',
+        'req.params  => ', req.params, '\n',
+        'req.url     => ', req.url, '\n',
+        'req.method  => ', req.method, '\n',
+        'getPaymentById() ======================= fim');
+
+    let paymentId = req.params.id;
+    let userId = req.decoded.id;
+    await service.verifyPaymentId(paymentId)
+        .then(async payment => service.verifyAccountId(payment.payDebitAccountId))
+        .then(async account => service.verifyAuditorAccessByAccount({ account, userId }))
+        .then(async accountGranted => {
+            if (!accountGranted)
+                return res.status(405).send({ message: `Erro ao localizar pagamento: [${paymentId}]` });
+            // Recupera pagamento...
+            let payment = await Payment.findByPk(paymentId);
+            return res.status(200).send(payment);
+        })
+        .catch(err => util.returnErr(err, res));
 }
 
 /*************************************************
@@ -71,12 +126,12 @@ exports.deletePayment = async function (req, res) {
                     await Payment.delete(payment, transaction);
                 });// Commit
             } catch (err) { // RollBack
-                return util.returnErr(err.message, res);
+                return util.returnErr(err, res);
             };
             // Fim da Transação!
             return res.status(200).send({ message: 'Pagamento excluído!' });
         })
-        .catch(err => util.returnErr(err.message, res));
+        .catch(err => util.returnErr(err, res));
 }
 
 /*************************************************
