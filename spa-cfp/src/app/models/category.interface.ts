@@ -1,3 +1,4 @@
+import { Value } from './value.interface';
 import { Observable } from 'rxjs';
 import { Balance } from './balance.interface';
 export interface Category {
@@ -9,4 +10,6 @@ export interface Category {
     version?: Date
     balance$?: Observable<Balance>
     balanceByMonth$?: Observable<Balance>
+    pendingValue$?: Observable<Value>
+    pendingValueByMonth$?: Observable<Value>
 }

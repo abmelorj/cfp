@@ -10,7 +10,7 @@ exports.returnErr = function (err, res) {
         if (!err.message)
             return res.status(500).send(logerr(err))
         else
-            return res.status(500).send(logerr(err.message))
+            return res.status(500).send(logerr(err.message + (err.sql ? '[' + err.sql + ']' : '')))
     else
         return res.status(err.status).send(logerr(err.message));
 }
@@ -88,4 +88,27 @@ exports.firstDayYearMonth = (yearMonth) => {
 exports.firstDayNextYearMonth = (yearMonth) => {
     let firstDay = this.firstDayYearMonth(yearMonth)
     return firstDay.setMonth(firstDay.getMonth() + 1);
+}
+
+/**************************************************************
+ * @param {yearMonth} number - Ano e mês no formato AAAAMM
+ * @returns {boolean} Indica se o dado é válido
+ **************************************************************/
+exports.isYearMonthValid = (yearMonth) => {
+    if (isNaN(yearMonth)) return false;
+    try {
+        // Verifica se o mês informado é válido
+        let month = parseInt(yearMonth.substring(yearMonth.length - 2, yearMonth.length))
+        console.log(' ========= Month: ', month);
+        if (isNaN(month) || month < 1 || month > 12)
+            return false;
+        // Verifica se o ano informado é válido, acima de 1900
+        let year = parseInt(yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2))
+        console.log(' ========= Year : ', year);
+        if (isNaN(year) || year < 1900)
+            return false;
+    } catch (err) {
+        return false;
+    }
+    return true;
 }

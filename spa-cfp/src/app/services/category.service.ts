@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment'
 import { CFPService } from 'src/app/services/cfp.service';
 import { Balance } from 'src/app/models/balance.interface'
 import { Category } from 'src/app/models/category.interface';
+import { Value } from '../models/value.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,14 @@ export class CategoryService {
 
   getCategoryBalanceByMonth(id: number): Observable<Balance> {
     return this.http.get<Balance>(`${environment.api}/categories/${id}/balance/${this.cfp.yearMonth}`)
+  }
+
+  getCategoryPendingValue(id: number): Observable<Value> {
+    return this.http.get<Value>(`${environment.api}/categories/${id}/pendingValue`)
+  }
+
+  getCategoryPendingValueByMonth(id: number): Observable<Value> {
+    return this.http.get<Value>(`${environment.api}/categories/${id}/pendingValue/${this.cfp.yearMonth}`)
   }
 
   addCategory(category: Category): Observable<Category> {

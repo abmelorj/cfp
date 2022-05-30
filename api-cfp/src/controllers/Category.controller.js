@@ -1,5 +1,10 @@
 'use strict';
 require('dotenv').config();
+const self = require('./Category.controller')
+const util = require('../models/util');
+const service = require('../models/service');
+const db = require('./../database/db');
+const { Op } = require('sequelize');
 
 const AccessGrant = require('../models/AccessGrant');
 const AccessRule = require('../models/AccessRule');
@@ -8,6 +13,10 @@ const Category = require('../models/Category');
 const User = require('../models/User');
 const logerr = require('../config/logerr');
 const loginfo = require('../config/loginfo');
+const Shall = require('../models/Shall');
+const Operation = require('../models/Operation');
+const Account = require('../models/Account');
+const Payment = require('../models/Payment');
 
 // Validar preenchimento de name, catOwnerId e isCredit
 function validateNameOwnerCredit(category) {
@@ -210,54 +219,44 @@ async function getBalance(category) {
     // Recuperar lista de contas da categoria
     let accounts = []
     accounts = await category.getAccCategory();
-    debug('Accounts => ', accounts)
     let balances = []
     balances = accounts.map(async account => Balance.getBalance(account.id));
     // Aguarda todas as promisses carregadas no array balances
     return Promise.all(balances)
         .then(values => {
-            debug('Balances Mapped => ', balances);
             return values.reduce((total, balance) => total + (balance !== null ? balance.value : 0), 0);
         });
 }
 
 //Recupera a soma do saldo no mês das contas da categoria
-function getBalanceByMonth(category, yearMonth) {
+exports.getBalanceByMonth = async function (category, yearMonth) {
     debug(' getBalanceByMonth() ======================= ini\n',
         'category => ', category, '\n',
         'yearMonth => ', yearMonth, '\n',
         'getBalanceByMonth() ======================= fim');
 
     return new Promise(async (resolve, reject) => {
-        // TO-DO: VerifyYearMonthInvalid
-        try {
-            // Verifica se o mês informado é válido
-            let month = parseInt(yearMonth.substring(yearMonth.length - 2, yearMonth.length))
-            debug('month string => ', yearMonth.substring(yearMonth.length - 2, yearMonth.length), '\n',
-                'month parseInt => ', month);
-            if (isNaN(month) || month < 1 || month > 12)
-                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
-            // Verifica se o ano informado é válido, acima de 1900
-            let year = parseInt(yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2))
-            debug('year string => ', yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2), '\n',
-                'year parseInt => ', year);
-            if (isNaN(year) || year < 1900)
-                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
-        } catch (err) {
-            reject(`Erro ao validar yearMonth=${yearMonth} ==> [${err}]`);
+        if (!util.isYearMonthValid(yearMonth)) {
+            reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
         }
 
         // Recuperar lista de contas da categoria
         let accounts = []
         accounts = await category.getAccCategory();
-        debug('Accounts => ', accounts)
+        console.log('=========> ACCOUNTS: ', accounts);
         let balances = []
         balances = accounts.map(async account => Balance.getBalanceByYearMonth(account.id, yearMonth));
         // Aguarda todas as promisses carregadas no array balances
         resolve(Promise.all(balances)
             .then(values => {
-                debug('Balances Mapped => ', balances);
-                return values.reduce((total, balance) => total + (balance !== null ? balance.value : 0), 0);
+                console.log('===========> BALANCES: ', values);
+                let totalFound = 0;
+                values.forEach(balance => {
+                    console.log('======> BALANCE: ', balance);
+                    totalFound = totalFound + (balance && balance.value ? balance.value : 0);
+                });
+                console.log('===========> TOTAL: ', totalFound);
+                return totalFound;
             })
         );
     })
@@ -406,9 +405,7 @@ exports.listAccountByCategoryId = function (req, res) {
                     reject(returnErr({ status: 403, message: 'Acesso negado.' }, res));
                 let accounts = []
                 accounts = await category.getAccCategory();
-                debug('Accounts => ', accounts)
                 accounts = accounts.map(account => account.dataValues);
-                debug('Accounts Mapped => ', accounts)
                 // Ordena as contas por nome, usa normalize para desconsiderar acentuação
                 accounts = await accounts.sort((a, b) => {
                     let fa = a.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
@@ -422,7 +419,6 @@ exports.listAccountByCategoryId = function (req, res) {
                     }
                     return 0;
                 });
-                console.log('================ Accounts => ', accounts);
                 resolve(res.status(200).send(accounts));
             })
             .catch(err => reject(returnErr(`Erro ao buscar categoria ==> [${err}]`, res)));
@@ -457,15 +453,250 @@ exports.getCategoryBalanceByMonth = async function (req, res) {
 
     await validateCategoryId(req.params.id, req.decoded.id)
         .then(verifyAccessAuditor)
-        .then(category => getBalanceByMonth(category, req.params.yearMonth))
+        .then(category => self.getBalanceByMonth(category, req.params.yearMonth))
         .then(balance => {
             debug('Category Balance by Month => ', balance)
             res.status(200).send({ value: balance })
         })
-        .catch(err => returnErr(err, res))
+        .catch(err => util.returnErr(err, res))
 }
 
 const debug = (...msg) => {
     if ((process.env.DEBUG || 'false') == 'true')
         return console.log(...msg);
 }
+
+
+/*************************************************************
+ * Retorna o valor pendente de pagamento nas contas de débito, 
+ * crédito ou cartão de crédito até o mês informado.
+ ************************************************************/
+exports.getCategoryPendingValueByMonth = async function (req, res) {
+    util.debug(' getCategoryPendingValueByMonth() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'getCategoryPendingValueByMonth() ======================= fim');
+
+    /******************************************
+     * - Conta de reserva ou cartão de crédito (isCredit),
+     *   apurar obrigações pendentes associadas às operações no mês.
+     * - Conta de débito (!isCredit),
+     *   apurar pagamentos pendentes no mês.
+     *****************************************/
+    let userId = req.decoded.id;
+    let categoryId = req.params.id;
+    let yearMonth = req.params.yearMonth;
+    await service.verifyCategoryId(categoryId)
+        .then(async category => service.verifyAuditorAccessByCategoryId(category.id, userId))
+        .then(async categoryGranted => {
+            if (!categoryGranted)
+                return res.status(405).send({ message: `Erro ao tentar localizar valor pendente da categoria: [${categoryId}]` });
+            let pendingValue = await self.getPendingsByMonth(categoryGranted.id, categoryGranted.isCredit, yearMonth);
+            // Apura o somatório do valor pendente...
+            res.status(200).send({ value: pendingValue });
+        })
+        .catch(err => util.returnErr(err, res));
+}
+
+// Retorna os valores de obrigações pendentes por categoria até o mês informado
+exports.getPendingsByMonth = async function (categoryId, isCredit, yearMonth) {
+    let pendingValue = 0;
+    // Verifica como vai apurar o valor pendente
+    if (isCredit) {
+        // Para as contas de crédito e cartão de crédito, apura pela entidade Shall
+        let arrayPendingValueSource = await getPendingValueBySourceCategoryIdYearMonth(categoryId, yearMonth);
+        let arrayPendingValueDestiny = await getPendingValueByDestinyCategoryIdYearMonth(categoryId, yearMonth);
+        pendingValue = arrayPendingValueSource[0].value + arrayPendingValueDestiny[0].value;
+    } else {
+        // Para as contas de débito, apura pela entidade Payment
+        pendingValue = await Payment.getPendingValueByCategoryIdYearMonth(categoryId, yearMonth);
+    }
+    return pendingValue;
+}
+
+/****************************************************
+ * Obter o valor de obrigações pendentes para uma 
+ * categoria associada à conta de origem da operação.
+ ***************************************************/
+async function getPendingValueBySourceCategoryIdYearMonth(categoryId, yearMonth, transaction) {
+    return Shall.findAll({
+        attributes: [
+            [db.fn('SUM', db.col('Shall.value')), 'value']
+        ],
+        where: {
+            [Op.and]: [
+                { isPending: true },
+                { shaDate: { [Op.lt]: util.firstDayNextYearMonth(yearMonth) } }
+            ]
+        },
+        required: true,
+        include: [{
+            model: Operation,
+            as: 'shaOperation',
+            where: {
+                oprTypeId: { [Op.gt]: 6 }
+            },
+            required: true,
+            attributes: [],
+            include: [{
+                model: Account,
+                as: 'oprSourceAccount',
+                required: true,
+                attributes: [],
+                where: { accCategoryId: categoryId },
+                transaction
+            }],
+            transaction
+        }],
+        transaction
+    });
+}
+/****************************************************
+ * Obter o valor de obrigações pendentes para uma 
+ * categoria associada à conta de destino da operação.
+ ***************************************************/
+async function getPendingValueByDestinyCategoryIdYearMonth(categoryId, yearMonth, transaction) {
+    return Shall.findAll({
+        attributes: [
+            [db.fn('SUM', db.col('Shall.value')), 'value']
+        ],
+        where: {
+            [Op.and]: [
+                { isPending: true },
+                { shaDate: { [Op.lt]: util.firstDayNextYearMonth(yearMonth) } }
+            ]
+        },
+        required: true,
+        include: [{
+            model: Operation,
+            as: 'shaOperation',
+            where: {
+                oprTypeId: { [Op.gt]: 6 }
+            },
+            required: true,
+            attributes: [],
+            include: [{
+                model: Account,
+                as: 'oprDestinyAccount',
+                required: true,
+                attributes: [],
+                where: { accCategoryId: categoryId },
+                transaction
+            }],
+            transaction
+        }],
+        transaction
+    });
+}
+// ======================================================================
+/*************************************************************
+ * Retorna o valor pendente de pagamento nas contas de débito, 
+ * crédito ou cartão de crédito.
+ ************************************************************/
+exports.getCategoryPendingValue = async function (req, res) {
+    util.debug(' getCategoryPendingValue() ======================= ini\n',
+        'req.body => ', req.body, '\n',
+        'req.decoded.id => ', req.decoded.id, '\n',
+        'req.params => ', req.params, '\n',
+        'getCategoryPendingValue() ======================= fim');
+
+    /******************************************
+     * - Conta de reserva ou cartão de crédito (isCredit),
+     *   apurar obrigações pendentes associadas às operações.
+     * - Conta de débito (!isCredit),
+     *   apurar pagamentos pendentes.
+     *****************************************/
+    let userId = req.decoded.id;
+    let categoryId = req.params.id;
+    await service.verifyCategoryId(categoryId)
+        .then(async category => service.verifyAuditorAccessByCategoryId(category.id, userId))
+        .then(async categoryGranted => {
+            if (!categoryGranted)
+                return res.status(405).send({ message: `Erro ao tentar localizar valor pendente da categoria: [${categoryId}]` });
+
+            // Verifica como vai apurar o valor pendente
+            if (categoryGranted.isCredit) {
+                // Para as contas de crédito e cartão de crédito, apura pela entidade Shall
+                let arrayPendingValueSource = await getPendingValueBySourceCategoryId(categoryGranted.id);
+                let arrayPendingValueDestiny = await getPendingValueByDestinyCategoryId(categoryGranted.id);
+                let pendingValue = arrayPendingValueSource[0].value + arrayPendingValueDestiny[0].value;
+                res.status(200).send({ value: pendingValue });
+            } else {
+                // Para as contas de débito, apura pela entidade Payment
+                let pendingValue = await Payment.getPendingValueByCategoryId(categoryGranted.id);
+                res.status(200).send({ value: pendingValue });
+            }
+        })
+        .catch(err => util.returnErr(err, res));
+}
+
+/****************************************************
+ * Obter o valor de obrigações pendentes para uma 
+ * categoria associada à conta de origem da operação.
+ ***************************************************/
+async function getPendingValueBySourceCategoryId(categoryId, transaction) {
+    return Shall.findAll({
+        attributes: [
+            [db.fn('SUM', db.col('Shall.value')), 'value']
+        ],
+        where: {
+            isPending: true
+        },
+        required: true,
+        include: [{
+            model: Operation,
+            as: 'shaOperation',
+            where: {
+                oprTypeId: { [Op.gt]: 6 }
+            },
+            required: true,
+            attributes: [],
+            include: [{
+                model: Account,
+                as: 'oprSourceAccount',
+                required: true,
+                attributes: [],
+                where: { accCategoryId: categoryId },
+                transaction
+            }],
+            transaction
+        }],
+        transaction
+    });
+}
+/****************************************************
+ * Obter o valor de obrigações pendentes para uma 
+ * categoria associada à conta de destino da operação.
+ ***************************************************/
+async function getPendingValueByDestinyCategoryId(categoryId, transaction) {
+    return Shall.findAll({
+        attributes: [
+            [db.fn('SUM', db.col('Shall.value')), 'value']
+        ],
+        where: {
+            isPending: true
+        },
+        required: true,
+        include: [{
+            model: Operation,
+            as: 'shaOperation',
+            where: {
+                oprTypeId: { [Op.gt]: 6 }
+            },
+            required: true,
+            attributes: [],
+            include: [{
+                model: Account,
+                as: 'oprDestinyAccount',
+                required: true,
+                attributes: [],
+                where: { accCategoryId: categoryId },
+                transaction
+            }],
+            transaction
+        }],
+        transaction
+    });
+}
+// ======================================================================

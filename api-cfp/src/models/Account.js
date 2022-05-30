@@ -25,7 +25,9 @@ class Account extends Model {
             include: {
                 model: Category,
                 as: 'accCategory',
-                where: { catOwnerId }
+                where: { catOwnerId: catOwnerId },
+                required: true,
+                transaction
             },
             order: [
                 ['name', 'ASC']

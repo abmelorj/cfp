@@ -1,9 +1,9 @@
 :host ::ng-deep .mat-tab-label {
-    width: 50%;
+    width: 100%;
     font-size: 1.2rem;
 }
 
-mat-tab-group, app-operation-list {
+mat-tab-group, app-shall-list {
     /* background-color: aqua; */
     height: 100%;
     /* padding: 0px; */
@@ -83,8 +83,4 @@ table {
 
 .cfp-light {
     font-weight: lighter;
-}
-
-.cfp-normal {
-    font-weight: 400;
 }

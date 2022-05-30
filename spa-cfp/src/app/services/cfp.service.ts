@@ -1,13 +1,16 @@
+'use strict';
 import { AccountListComponent } from './../views/account/account-list/account-list.component';
 import { Category } from 'src/app/models/category.interface';
-'use strict';
+import { CategoryComponent } from './../views/category/category.component';
+import { OperationListComponent } from './../views/operation/operation-list/operation-list.component';
+import { User } from 'src/app/models/user.interface';
 
 import { Injectable } from "@angular/core";
 import { HttpHeaders } from "@angular/common/http";
 import { MatSnackBar } from '@angular/material/snack-bar'
 import jwt_decode from 'jwt-decode';
-import { CategoryComponent } from './../views/category/category.component';
-import { User } from 'src/app/models/user.interface';
+import { Account } from '../models/account.interface';
+import { Operation } from '../models/operation.interface';
 
 @Injectable({
     providedIn: 'root'
@@ -17,6 +20,7 @@ export class CFPService {
     constructor(
         private snackBar: MatSnackBar
     ) {
+        this.shallLabel = 'Obrigação pendente'
         this.shallValue = 0.00
         this.balanceValue = 0.00
         this.finalBalanceValue = 0.00
@@ -27,9 +31,18 @@ export class CFPService {
     public yearMonth: number = 0;
 
     // Footer
+    public shallLabel: string = 'Obrigação pendente';
     public shallValue: number = 0;
+    public balanceLabel: string = 'Saldo no mês';
     public balanceValue: number = 0;
+    public finalBalanceLabel: string = 'Saldo final';
     public finalBalanceValue: number = 0;
+
+    defaultFooter() {
+        this.shallLabel = 'Obrigação pendente';
+        this.balanceLabel = 'Saldo no mês';
+        this.finalBalanceLabel = 'Saldo final';
+    }
 
     // CFP User Logged
     public user: User = { id: 0, email: '' }
@@ -69,9 +82,25 @@ export class CFPService {
         this.category = { ...category };
     }
 
+    // Account in use
+    public account: Account = { name: '', isCredit: false, isCard: false, accCategoryId: 0 };
+    setAccount(account: Account): void {
+        this.account = { ...account };
+    }
+
+    // Operation in use
+    public operation: Operation = { description: '', oprDate: new Date(), value: 0, oprTypeId: 0 };
+    setOperation(operation: Operation): void {
+        this.operation = { ...operation };
+    }
+
     // Account List Component, armazena a referência do componente AccountListComponent para:
     // - atualizar lista de contas e saldos quando alterar o mês selecionado no MonthComponent.
     public accountListComponent?: AccountListComponent;
+
+    // Operation List Component, armazena a referência do componente OperationListComponent para:
+    // - atualizar lista de operações e saldos quando alterar o mês selecionado no MonthComponent.
+    public operationListComponent?: OperationListComponent;
 
     async digest(message: string, algorithm = 'SHA-512') {
         // encode as (utf-8) Uint8Array

@@ -7,6 +7,7 @@ import { CFPService } from 'src/app/services/cfp.service';
 import { Component, OnInit, AfterContentChecked, Input, DoCheck, OnDestroy } from '@angular/core';
 import { Account } from 'src/app/models/account.interface';
 import { Balance } from './../../../models/balance.interface';
+import { Value } from 'src/app/models/value.interface';
 
 
 @Component({
@@ -21,6 +22,8 @@ export class AccountListComponent implements OnInit, AfterContentChecked, DoChec
   private categoryId: string;
   private balance: number = 0;
   private balanceByMonth: number = 0;
+  private pendingValue: number = 0;
+  private pendingValueByMonth: number = 0;
 
   constructor(
     private route: ActivatedRoute,
@@ -55,8 +58,10 @@ export class AccountListComponent implements OnInit, AfterContentChecked, DoChec
   ngAfterContentChecked(): void { }
 
   ngDoCheck(): void {
-    this.cfpService.balanceValue = this.balanceByMonth;
-    this.cfpService.finalBalanceValue = this.balance;
+    this.cfpService.shallLabel = 'Obrigação pendente';
+    this.cfpService.shallValue = this.pendingValueByMonth;
+    this.cfpService.balanceValue = this.balanceByMonth - this.pendingValueByMonth;
+    this.cfpService.finalBalanceValue = this.balance - this.pendingValue;
   }
 
   ngOnDestroy(): void {
@@ -71,6 +76,8 @@ export class AccountListComponent implements OnInit, AfterContentChecked, DoChec
         .pipe(map(accounts$ => accounts$.map(account => {
           account.balance$ = this.accountService.getAccountBalance(account.id || 0);
           account.balanceByMonth$ = this.accountService.getAccountBalanceByMonth(account.id || 0);
+          account.pendingValue$ = this.accountService.getAccountPendingValue(account.id || 0);
+          account.pendingValueByMonth$ = this.accountService.getAccountPendingValueByMonth(account.id || 0);
           return account;
         })));
       // Calcula os saldos
@@ -97,6 +104,20 @@ export class AccountListComponent implements OnInit, AfterContentChecked, DoChec
             .map(account => (account.balanceByMonth$ || new Observable<Balance>()).toPromise());
           this.balanceByMonth = await Promise.all(balancePromises)
             .then(balances => balances.reduce((total, balance) => total + (balance !== null ? balance.value : 0), 0));
+
+          // Calcula soma do valor comprometido na conta até o mês...
+          let valuePromises = accounts[0]
+            .filter(account => account.isActive)
+            .map(account => (account.pendingValueByMonth$ || new Observable<Value>()).toPromise());
+          this.pendingValueByMonth = await Promise.all(valuePromises)
+            .then(pendingValues => pendingValues.reduce((total, pendingValue) => total + (pendingValue !== null ? pendingValue.value : 0), 0));
+
+          // Calcula soma do valor comprometido na conta...
+          valuePromises = accounts[0]
+            .filter(account => account.isActive)
+            .map(account => (account.pendingValue$ || new Observable<Value>()).toPromise());
+          this.pendingValue = await Promise.all(valuePromises)
+            .then(pendingValues => pendingValues.reduce((total, pendingValue) => total + (pendingValue !== null ? pendingValue.value : 0), 0));
         })
       resolve(true);
     })

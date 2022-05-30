@@ -1,1 +1,60 @@
-<p>operation-list works!</p>
+<table mat-table [dataSource]="operations$">
+    <!-- Data -->
+    <ng-container matColumnDef="oprDate">
+        <th mat-header-cell *matHeaderCellDef="" class="cfp-th">Data</th>
+        <td mat-cell *matCellDef="let operation"
+            [class]="['cfp-td', 'cfp-td-date', operation.oprTypeId > 5 ? 'cfp-bold' : 'cfp-normal']">
+            {{strBrlDateToString(operation.oprDate.toString())}}
+        </td>
+    </ng-container>
+    <!-- Histórico -->
+    <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef="" class="cfp-th">Histórico</th>
+        <td mat-cell *matCellDef="let operation"
+            [class]="['cfp-td', 'cfp-td-description', operation.oprTypeId > 5 ? 'cfp-bold' : 'cfp-normal']"
+            routerLink="{{operation.oprTypeId > 5 ? '/shall/list/' + operation.id : '/operation/list/' + accountId}}">
+            {{operation.description}}</td>
+    </ng-container>
+    <!-- Valor -->
+    <ng-container matColumnDef="value">
+        <th mat-header-cell *matHeaderCellDef="" class="cfp-th cfp-td-value">Valor</th>
+        <td mat-cell *matCellDef="let operation"
+            [class]="['cfp-td', 'cfp-td-value', operation.oprTypeId > 5 ? 'cfp-bold' : 'cfp-normal']">
+            <span
+                *ngIf="((operation.oprSourceAccountId == accountId || [5,7,8].includes(operation.oprTypeId)) ? {value: operation.value * (-1)} : {value: operation.value}) || {value: 0} as signedValue">
+                {{signedValue.value | number : '1.2-2'}}
+            </span>
+        </td>
+    </ng-container>
+    <!-- Ação -->
+    <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef="" class="cfp-th"></th>
+        <td mat-cell *matCellDef="let operation" class="cfp-td cfp-td-action">
+            <span class="material-icons blue" routerLink="/operation/edit/{{operation.id}}">edit</span>
+        </td>
+    </ng-container>
+    <!-- Definição do Header -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+<button mat-fab color="primary" aria-label="Button with an add icon" class="mainAction" routerLink="/operation/create">
+    <mat-icon>add</mat-icon>
+</button>
+
+
+<!-- <mat-tab-group mat-align-tabs="center" animationDuration="0ms">
+    <mat-tab label="{{accountName}}">
+        <span *ngFor="let operation of operations$ | async">
+            <app-list-item
+                *ngIf="(operation.oprSourceAccountId == accountId ? {value: operation.value * (-1)} : {value: operation.value}) || {value: 0} as signedValue"
+                date="{{strBrlDateToString(operation.oprDate.toString())}}" name="{{operation.description}}"
+                [value]="signedValue.value" action="edit" route="/operation/update/{{operation.id}}"
+                class="cfp-list-item-line" routerLink="/operation/list/{{accountId}}">
+            </app-list-item>
+        </span>
+        <button mat-fab color="primary" aria-label="Button with an add icon" class="mainAction"
+            routerLink="/operation/create">
+            <mat-icon>add</mat-icon>
+        </button>
+    </mat-tab>
+</mat-tab-group> -->

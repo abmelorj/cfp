@@ -1,1 +1,151 @@
-<p>operation-create works!</p>
+<form (ngSubmit)="addOperation()" #form="ngForm" class="form">
+    <!-- ************************************************************************* -->
+    <!-- Operação -->
+    <!-- ************************************************************************* -->
+    <mat-form-field appearance="outline" class="form-field-full-width">
+        <mat-label>Operação</mat-label>
+        <mat-select [(value)]="operation.oprTypeId" (selectionChange)="loadBalances()" matTooltip="Selecione a operação"
+            id="oprTypeId" name="oprTypeId" [(ngModel)]="operation.oprTypeId" required>
+            <mat-option *ngFor="let type of operationTypes" [value]="type.id">
+                {{type.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+    <!-- ************************************************************************* -->
+    <!-- Conta de Destino -->
+    <!-- ************************************************************************* -->
+    <!-- 3 -- Transferir Valor -->
+    <mat-form-field appearance="outline" class="form-field-full-width" *ngIf="[3].includes(operation.oprTypeId || 0)">
+        <mat-label>Para a conta de Recurso Financeiro</mat-label>
+        <mat-select [(value)]="operation.oprDestinyAccountId" (selectionChange)="loadBalances()"
+            id="oprDestinyAccountId" name="oprDestinyAccountId" [(ngModel)]="operation.oprDestinyAccountId"
+            [required]="[3].includes(operation.oprTypeId || 0)">
+            <mat-option *ngFor="let account of debitAccounts" [value]="account.id">
+                {{account.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <!-- 4 -- Transferir Reserva -->
+    <mat-form-field appearance="outline" class="form-field-full-width" *ngIf="[4].includes(operation.oprTypeId || 0)">
+        <mat-label>Para a conta de Reserva Financeira</mat-label>
+        <mat-select [(value)]="operation.oprDestinyAccountId" (selectionChange)="loadBalances()"
+            id="oprDestinyAccountId" name="oprDestinyAccountId" [(ngModel)]="operation.oprDestinyAccountId"
+            [required]="[4].includes(operation.oprTypeId || 0)">
+            <mat-option *ngFor="let account of creditAccounts" [value]="account.id">
+                {{account.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <!-- 5 -- Pagar à Vista -->
+    <!-- 7 -- Agendar Pagamento -->
+    <mat-form-field appearance="outline" class="form-field-full-width" *ngIf="[5,7].includes(operation.oprTypeId || 0)">
+        <mat-label>Com Recurso Financeiro de</mat-label>
+        <mat-select [(value)]="operation.oprDestinyAccountId" (selectionChange)="loadBalances()"
+            id="oprDestinyAccountId" name="oprDestinyAccountId" [(ngModel)]="operation.oprDestinyAccountId"
+            [required]="[5,7].includes(operation.oprTypeId || 0)">
+            <mat-option *ngFor="let account of debitAccounts" [value]="account.id">
+                {{account.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <!-- 6 -- Pagar com Cartão de Crédito -->
+    <mat-form-field appearance="outline" class="form-field-full-width" *ngIf="[6].includes(operation.oprTypeId || 0)">
+        <mat-label>Utilizando crédito de</mat-label>
+        <mat-select [(value)]="operation.oprDestinyAccountId" (selectionChange)="loadBalances()"
+            id="oprDestinyAccountId" name="oprDestinyAccountId" [(ngModel)]="operation.oprDestinyAccountId"
+            [required]="[6].includes(operation.oprTypeId || 0)">
+            <mat-option *ngFor="let account of creditCardAccounts" [value]="account.id">
+                {{account.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <!-- ************************************************************************* -->
+    <!-- Descrição -->
+    <!-- ************************************************************************* -->
+    <mat-form-field appearance="outline" class="form-field-full-width" *ngIf="operation.oprTypeId">
+        <mat-label>Histórico/Descrição</mat-label>
+        <textarea cols="30" rows="5" matInput [placeholder]="hintDescriptionByOperationType(operation.oprTypeId || 0)"
+            class="form-control" type="text" name="description" id="description" [(ngModel)]="operation.description"
+            required></textarea>
+    </mat-form-field>
+
+    <span class="form-row">
+        <!-- ************************************************************************* -->
+        <!-- Data da Operação -->
+        <!-- ************************************************************************* -->
+        <!-- 1 a 5 -- full -->
+        <mat-form-field appearance="outline" class="form-field-full-width"
+            *ngIf="[1,2,3,4,5].includes(operation.oprTypeId || 0)">
+            <mat-label>Data da operação</mat-label>
+            <input matInput [matTooltip]="hintOprDateByOperationType(operation.oprTypeId || 0)" class="form-control"
+                type="date" name="oprDate" id="oprDate" [(ngModel)]="operation.oprDate"
+                [required]="[1,2,3,4,5].includes(operation.oprTypeId || 0)" />
+        </mat-form-field>
+
+        <!-- 6 -- 30% -->
+        <mat-form-field appearance="outline" class="form-field-30-width" *ngIf="[6].includes(operation.oprTypeId || 0)">
+            <mat-label>Data da compra</mat-label>
+            <input matInput [matTooltip]="hintOprDateByOperationType(operation.oprTypeId || 0)" class="form-control"
+                type="date" name="oprDate" id="oprDate" [(ngModel)]="operation.oprDate"
+                [required]="[6].includes(operation.oprTypeId || 0)" />
+        </mat-form-field>
+
+        <!-- 7,8 -- 45% -->
+        <mat-form-field appearance="outline" class="form-field-45-width"
+            *ngIf="[7,8].includes(operation.oprTypeId || 0)">
+            <mat-label>Data prevista</mat-label>
+            <input matInput [matTooltip]="hintOprDateByOperationType(operation.oprTypeId || 0)" class="form-control"
+                type="date" name="oprDate" id="oprDate" [(ngModel)]="operation.oprDate"
+                [required]="[7,8].includes(operation.oprTypeId || 0)" />
+        </mat-form-field>
+
+        <!-- ************************************************************************* -->
+        <!-- Data da 1ª Parcela -->
+        <!-- ************************************************************************* -->
+        <!-- 6 -- 30% -->
+        <mat-form-field appearance="outline" class="form-field-30-width" *ngIf="[6].includes(operation.oprTypeId || 0)">
+            <mat-label>Data 1ª parcela</mat-label>
+            <input matInput matTooltip="Data da fatura do cartão que pagará a 1ª parcela" class="form-control"
+                type="date" name="startDate" id="startDate" [(ngModel)]="operation.startDate"
+                [required]="[6].includes(operation.oprTypeId || 0)" />
+        </mat-form-field>
+
+        <!-- ************************************************************************* -->
+        <!-- Quantidade de Parcelas -->
+        <!-- ************************************************************************* -->
+        <!-- 6 -- 30% -->
+        <mat-form-field appearance="outline" class="form-field-30-width" *ngIf="[6].includes(operation.oprTypeId || 0)">
+            <mat-label>Qtd. parcelas</mat-label>
+            <input matInput matTooltip="Quantidade de parcelas" class="form-control" type="number" name="qtyPayments"
+                id="qtyPayments" [(ngModel)]="operation.qtyPayments"
+                [required]="[6].includes(operation.oprTypeId || 0)" />
+        </mat-form-field>
+
+        <!-- 7,8 -- 45% -->
+        <mat-form-field appearance="outline" class="form-field-45-width"
+            *ngIf="[7,8].includes(operation.oprTypeId || 0)">
+            <mat-label>Qtd. parcelas</mat-label>
+            <input matInput matTooltip="Quantidade de parcelas" class="form-control" type="number" name="qtyPayments"
+                id="qtyPayments" [(ngModel)]="operation.qtyPayments"
+                [required]="[7,8].includes(operation.oprTypeId || 0)" />
+        </mat-form-field>
+    </span>
+
+    <!-- ************************************************************************* -->
+    <!-- Valor -->
+    <!-- ************************************************************************* -->
+    <mat-form-field appearance="outline" class="form-field-full-width" *ngIf="operation.oprTypeId">
+        <mat-label>Valor</mat-label>
+        <input matInput [placeholder]="hintValueByOperationType(operation.oprTypeId || 0)" class="form-control"
+            type="number" name="value" id="value" [(ngModel)]="operation.value" required>
+    </mat-form-field>
+
+    <!-- ************************************************************************* -->
+    <button mat-raised-button color="primary" type="submit" class="btn btn-primary btn-block"
+        [disabled]="form.form.invalid">{{actionByOperationType(operation.oprTypeId || 0)}}</button>
+
+</form>

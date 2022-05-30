@@ -1,0 +1,48 @@
+<mat-tab-group mat-align-tabs="center" animationDuration="0ms">
+    <mat-tab label="{{operationDescription}}">
+
+        <table mat-table [dataSource]="shalls$">
+            <!-- Data -->
+            <ng-container matColumnDef="oprDate">
+                <th mat-header-cell *matHeaderCellDef="" class="cfp-th">Data</th>
+                <td mat-cell *matCellDef="let shall"
+                    [class]="['cfp-td', 'cfp-td-date', shall.isPending ? 'cfp-bold' : 'cfp-light']">
+                    {{strBrlDateToString(shall.shaDate.toString())}}
+                </td>
+            </ng-container>
+            <!-- Histórico -->
+            <ng-container matColumnDef="description">
+                <th mat-header-cell *matHeaderCellDef="" class="cfp-th">Histórico</th>
+                <td mat-cell *matCellDef="let shall"
+                    [class]="['cfp-td', 'cfp-td-description', shall.isPending ? 'cfp-bold' : 'cfp-light']">
+                    Parcela {{shall.shallNr}} de {{cfpService.operation.qtyPayments}}</td>
+            </ng-container>
+            <!-- Valor -->
+            <ng-container matColumnDef="value">
+                <th mat-header-cell *matHeaderCellDef="" class="cfp-th cfp-td-value">Valor</th>
+                <td mat-cell *matCellDef="let shall"
+                    [class]="['cfp-td' ,'cfp-td-value', shall.isPending ? 'cfp-bold' : 'cfp-light']">
+                    <span
+                        *ngIf="((cfpService.operation.oprSourceAccountId == cfpService.account.id || [5,7,8].includes(cfpService.operation.oprTypeId || 0)) ? {value: shall.value * (-1)} : {value: shall.value}) || {value: 0} as signedValue">
+                        {{signedValue.value | number : '1.2-2'}}
+                    </span>
+                </td>
+            </ng-container>
+            <!-- Ação -->
+            <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef="" class="cfp-th"></th>
+                <td mat-cell *matCellDef="let shall" class="cfp-td cfp-td-action">
+                    <span class="material-icons blue" routerLink="/shall/edit/{{shall.id}}">edit</span>
+                </td>
+            </ng-container>
+            <!-- Definição do Header -->
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+    </mat-tab>
+</mat-tab-group>
+<!-- 
+<button mat-fab color="primary" aria-label="Button with an add icon" class="mainAction" routerLink="/operation/create">
+    <mat-icon>add</mat-icon>
+</button> 
+-->

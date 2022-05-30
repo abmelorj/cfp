@@ -311,10 +311,41 @@ exports.verifyAuditorAccessByAccount = function ({ account, userId }) {
 }
 
 // ==============================================================
+// Verificar se tem acesso de Auditor no CFP para realizar a operação
+// ==============================================================
+exports.verifyAuditorAccessByCategoryId = function (categoryId, userId) {
+    util.debug(' verifyAuditorAccessByCategoryId() ======================= ini\n',
+        'categoryId => ', categoryId, '\n',
+        'userId => ', userId, '\n',
+        'verifyAuditorAccessByCategoryId() ======================= fim');
+
+    return new Promise(async (resolve, reject) => {
+        if (!areCategoryIdAndUserIdPresent(categoryId, userId))
+            reject({ status: 405, message: `Erro ao verificar acesso: categoryId=[${categoryId}], userId=[${userId}]` });
+        await Category.findByPk(categoryId)
+            .then(async category => {
+                if (!category)
+                    reject({ status: 405, message: 'Erro ao validar acesso.' });
+                if (AccessRule.isAuditor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
+                    resolve(category)
+                else
+                    reject({ status: 403, message: 'Erro: Acesso negado.' });
+            })
+            .catch(err => reject({ status: 403, message: `Erro: Acesso negado. [${err}]` }));
+    })
+}
+
+// ==============================================================
 // Validators
 // ==============================================================
 function areAccountAndUserIdPresent(account, userId) {
     return !(account === undefined || userId === undefined ||
         account === null || userId === null || isNaN(userId));
+}
+
+function areCategoryIdAndUserIdPresent(categoryId, userId) {
+    return !(categoryId === undefined || userId === undefined ||
+        categoryId === null || userId === null ||
+        isNaN(categoryId) || isNaN(userId));
 }
 

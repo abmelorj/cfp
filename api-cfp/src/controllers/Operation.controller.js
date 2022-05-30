@@ -332,7 +332,7 @@ async function doPay(req, transaction) {
  * @returns Lista de obrigações da operação
  ***************************************************/
 exports.getShallByOperationId = async function (req, res) {
-    // TO-DO
+
     util.debug(' getShallByOperationId() ======================= ini\n',
         'req.body    => ', req.body, '\n',
         'req.decoded => ', req.decoded, '\n',
@@ -358,6 +358,41 @@ exports.getShallByOperationId = async function (req, res) {
                     // Recupera as obrigações da referida operação
                     let shalls = await Shall.findAll({ where: { shaOperationId: operationId } });
                     return res.status(200).send(shalls);
+                })
+        })
+        .catch(err => util.returnErr(err, res));
+}
+
+/****************************************************
+ * @returns Operação
+ ***************************************************/
+exports.getOperationById = async function (req, res) {
+    // TO-DO
+    util.debug(' getOperationById() ======================= ini\n',
+        'req.body    => ', req.body, '\n',
+        'req.decoded => ', req.decoded, '\n',
+        'req.params  => ', req.params, '\n',
+        'req.url     => ', req.url, '\n',
+        'req.method  => ', req.method, '\n',
+        'getOperationById() ======================= fim');
+
+    const userId = req.decoded.id;
+    const operationId = req.params.id;
+    // Valida o código da operação e retorna o objeto
+    await service.verifyOperationId(operationId)
+        .then(async operation => {
+            const oneAccountId = operation.oprSourceAccountId || operation.oprDestinyAccountId;
+            // Valida o código de conta associada à operação e retorna o objeto
+            await service.verifyAccountId(oneAccountId)
+                // Valida o acesso de auditor ao plano de contas da conta
+                .then(async account =>
+                    service.verifyAuditorAccessByAccount({ account, userId }))
+                .then(async account => {
+                    if (!account)
+                        return res.status(404).send({ message: 'Erro ao buscar operações.' });
+                    // Retorna a operação...
+                    let operation = await Operation.findByPk(operationId);
+                    return res.status(200).send(operation);
                 })
         })
         .catch(err => util.returnErr(err, res));

@@ -4,6 +4,8 @@ const express = require('express');
 const categoryController = require('../controllers/Category.controller');
 const router = express.Router();
 
+router.get('/:id/pendingValue/:yearMonth', categoryController.getCategoryPendingValueByMonth);
+router.get('/:id/pendingValue', categoryController.getCategoryPendingValue);
 router.get('/:id/balance/:yearMonth', categoryController.getCategoryBalanceByMonth);
 router.get('/:id/balance', categoryController.getCategoryBalance);
 router.get('/:id/accounts', categoryController.listAccountByCategoryId);

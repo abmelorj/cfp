@@ -8,6 +8,8 @@ const Balance = require('./Balance');
 const Operation = require('./Operation');
 const PayShall = require('./PayShall');
 const Shall = require('./Shall');
+const Category = require('./Category');
+const Account = require('./Account');
 
 class Payment extends Model {
 
@@ -134,6 +136,50 @@ class Payment extends Model {
                     { isPending: true }
                 ]
             },
+            transaction
+        });
+    }
+
+    /****************************************************
+     * Obter o valor de pagamentos pendentes para uma 
+     * conta até determinado mês.
+     ***************************************************/
+    static async getPendingValueByCategoryIdYearMonth(categoryId, yearMonth, transaction) {
+        return Payment.sum('value', {
+            where: {
+                [Op.and]: [
+                    { isPending: true },
+                    { payDate: { [Op.lt]: util.firstDayNextYearMonth(yearMonth) } }
+                ]
+            },
+            include: [{
+                model: Account,
+                as: 'payDebitAccount',
+                required: true,
+                where: { accCategoryId: categoryId },
+                transaction
+            }],
+            transaction
+        });
+    }
+
+    /****************************************************
+     * Obter o valor de pagamentos pendentes para uma conta.
+     ***************************************************/
+    static async getPendingValueByCategoryId(categoryId, transaction) {
+        return Payment.sum('value', {
+            where: {
+                [Op.and]: [
+                    { isPending: true }
+                ]
+            },
+            include: [{
+                model: Account,
+                as: 'payDebitAccount',
+                required: true,
+                where: { accCategoryId: categoryId },
+                transaction
+            }],
             transaction
         });
     }

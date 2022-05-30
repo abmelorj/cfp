@@ -3,7 +3,8 @@
         <span *ngFor="let account of accounts$ | async">
             <app-list-item *ngIf="(account.balanceByMonth$ | async) || {value: 0} as balanceByMonth"
                 name="{{account.name}}" [value]="balanceByMonth.value" action="edit"
-                route="/account/update/{{account.id}}" class="cfp-list-item-line">
+                route="/account/update/{{account.id}}" class="cfp-list-item-line"
+                routerLink="/operation/list/{{account.id}}">
             </app-list-item>
         </span>
         <button mat-fab color="primary" aria-label="Button with an add icon" class="mainAction"

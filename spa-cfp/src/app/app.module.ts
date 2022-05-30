@@ -47,6 +47,9 @@ import { AccountUpdateComponent } from './views/account/account-update/account-u
 import { OperationListComponent } from './views/operation/operation-list/operation-list.component';
 import { OperationCreateComponent } from './views/operation/operation-create/operation-create.component';
 import { OperationUpdateComponent } from './views/operation/operation-update/operation-update.component';
+import { ShallListComponent } from './views/shall/shall-list/shall-list.component';
+import { ShallUpdateComponent } from './views/shall/shall-update/shall-update.component';
+import { ShallCreateComponent } from './views/shall/shall-create/shall-create.component';
 
 @NgModule({
   declarations: [
@@ -72,6 +75,9 @@ import { OperationUpdateComponent } from './views/operation/operation-update/ope
     OperationListComponent,
     OperationCreateComponent,
     OperationUpdateComponent,
+    ShallListComponent,
+    ShallUpdateComponent,
+    ShallCreateComponent,
   ],
   imports: [
     BrowserModule,

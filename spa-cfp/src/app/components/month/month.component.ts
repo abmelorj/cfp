@@ -65,6 +65,9 @@ export class MonthComponent implements OnInit {
     // Atualizar a lista de contas quando altera o mês selecionado
     if (this.cfpService.accountListComponent)
       this.cfpService.accountListComponent.loadAccounts();
+    // Atualizar a lista de operações quando altera o mês selecionado
+    if (this.cfpService.operationListComponent)
+      this.cfpService.operationListComponent.loadOperations();
   }
 
   chosenYearHandler(normalizedYear: Moment) {

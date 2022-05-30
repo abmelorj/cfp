@@ -1,3 +1,4 @@
+import { Value } from './../../models/value.interface';
 import { Balance } from './../../models/balance.interface';
 import { Observable } from 'rxjs';
 import { CFPService } from 'src/app/services/cfp.service';
@@ -18,11 +19,17 @@ export class CategoryComponent implements OnInit, AfterContentChecked, DoCheck, 
 
   public categoryTabIndex?: number;
 
+  // Totalizadores Reserva Financeira
   private reservBalance: number = 0;
   private reservBalanceByMonth: number = 0;
+  private reservPendingValue: number = 0;
+  private reservPendingValueByMonth: number = 0;
 
+  // Totalizadores Recurso Financeiro
   private fundBalance: number = 0;
   private fundBalanceByMonth: number = 0;
+  private fundPendingValue: number = 0;
+  private fundPendingValueByMonth: number = 0;
 
   constructor(
     private categoryService: CategoryService,
@@ -69,6 +76,8 @@ export class CategoryComponent implements OnInit, AfterContentChecked, DoCheck, 
       this.categories.forEach(category => {
         category.balance$ = this.categoryService.getCategoryBalance(category.id || 0);
         category.balanceByMonth$ = this.categoryService.getCategoryBalanceByMonth(category.id || 0);
+        category.pendingValue$ = this.categoryService.getCategoryPendingValue(category.id || 0);
+        category.pendingValueByMonth$ = this.categoryService.getCategoryPendingValueByMonth(category.id || 0);
         if (category.isActive) {
           if (category.isCredit && !this.categoryService.isCreditCardCategory(category.name)) {
             this.reservs.push(category);
@@ -76,7 +85,7 @@ export class CategoryComponent implements OnInit, AfterContentChecked, DoCheck, 
             this.funds.push(category)
           }
         }
-      })
+      });
       this.calulateBalances();
     }
   }
@@ -84,9 +93,13 @@ export class CategoryComponent implements OnInit, AfterContentChecked, DoCheck, 
   calulateBalances() {
     // Calcula os saldos...
     return new Promise(async (resolve) => {
-      // Array auxiliar usado para calcular os saldos no mês e final por tipo de categoria
+      // Arrays auxiliares usados para calcular os saldos no mês e final por tipo de categoria
       let balancePromises: Promise<Balance>[] = [];
+      let pendingValuePromises: Promise<Value>[] = [];
 
+      /************************************
+       *  BALANCE
+       * */
       // Saldo no Mês de Reserva Financeira
       balancePromises = this.reservs
         .filter(category => category !== null && category.isActive && category.balanceByMonth$ !== null)
@@ -115,6 +128,37 @@ export class CategoryComponent implements OnInit, AfterContentChecked, DoCheck, 
       this.fundBalance = await Promise.all(balancePromises)
         .then(balances => balances.reduce((total, balance) => total + (balance !== null ? balance.value : 0), 0));
 
+      /************************************
+       *  PENDING VALUE
+       * */
+      // Saldo no Mês de Reserva Financeira
+      pendingValuePromises = this.reservs
+        .filter(category => category !== null && category.isActive && category.pendingValueByMonth$ !== null)
+        .map(async category => (category.pendingValueByMonth$ || new Observable<Value>()).toPromise());
+      this.reservPendingValueByMonth = await Promise.all(pendingValuePromises)
+        .then(pendingValues => pendingValues.reduce((total, pendingValue) => total + (pendingValue !== null ? pendingValue.value : 0), 0));
+
+      // Saldo Final de Reserva Financeira
+      pendingValuePromises = this.reservs
+        .filter(category => category !== null && category.isActive && category.pendingValue$ !== null)
+        .map(async category => (category.pendingValue$ || new Observable<Value>()).toPromise());
+      this.reservPendingValue = await Promise.all(pendingValuePromises)
+        .then(pendingValues => pendingValues.reduce((total, pendingValue) => total + (pendingValue !== null ? pendingValue.value : 0), 0));
+
+      // Saldo no Mês de Recurso Financeiro
+      pendingValuePromises = this.funds
+        .filter(category => category !== null && category.isActive && category.pendingValueByMonth$ !== null)
+        .map(async category => (category.pendingValueByMonth$ || new Observable<Value>()).toPromise());
+      this.fundPendingValueByMonth = await Promise.all(pendingValuePromises)
+        .then(pendingValues => pendingValues.reduce((total, pendingValue) => total + (pendingValue !== null ? pendingValue.value : 0), 0));
+
+      // Saldo Final de Recurso Financeiro
+      pendingValuePromises = this.funds
+        .filter(category => category !== null && category.isActive && category.pendingValue$ !== null)
+        .map(async category => (category.pendingValue$ || new Observable<Value>()).toPromise());
+      this.fundPendingValue = await Promise.all(pendingValuePromises)
+        .then(pendingValues => pendingValues.reduce((total, pendingValue) => total + (pendingValue !== null ? pendingValue.value : 0), 0));
+
       resolve(true);
     });
   }
@@ -122,11 +166,17 @@ export class CategoryComponent implements OnInit, AfterContentChecked, DoCheck, 
   ngDoCheck(): void {
     // Configura os saldos conforme a aba selecionada
     if (this.categoryTabIndex === 0) {
-      this.cfpService.balanceValue = this.reservBalanceByMonth;
-      this.cfpService.finalBalanceValue = this.reservBalance;
+      // Reserva Financeira
+      this.cfpService.shallLabel = 'Obrigação pendente';
+      this.cfpService.shallValue = this.reservPendingValueByMonth;
+      this.cfpService.balanceValue = this.reservBalanceByMonth - this.reservPendingValueByMonth;
+      this.cfpService.finalBalanceValue = this.reservBalance - this.reservPendingValue;
     } else {
-      this.cfpService.balanceValue = this.fundBalanceByMonth;
-      this.cfpService.finalBalanceValue = this.fundBalance;
+      // Recurso Financeiro
+      this.cfpService.shallLabel = 'Obrigação pendente';
+      this.cfpService.shallValue = this.fundPendingValueByMonth;
+      this.cfpService.balanceValue = this.fundBalanceByMonth - this.fundPendingValueByMonth;
+      this.cfpService.finalBalanceValue = this.fundBalance - this.fundPendingValue;
     }
   }
 

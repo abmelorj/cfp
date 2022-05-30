@@ -10,6 +10,7 @@ router.post('/transfer', operationController.transferOperation);
 router.post('/forecast', operationController.forecastOperation);
 router.post('/pay', operationController.payOperation);
 router.get('/:id/shalls', operationController.getShallByOperationId);
+router.get('/:id', operationController.getOperationById);
 router.put('/:id', operationController.updateOperationById);
 router.delete('/:id', operationController.deleteOperationById);
 

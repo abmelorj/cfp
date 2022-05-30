@@ -1,9 +1,15 @@
-.cfp-label, .cfp-value, .cfp-action {
+.cfp-label, .cfp-value, .cfp-action, .cfp-date {
     display: flex;
     align-items: center;
     height: 1.2rem;
     font-size: 1.1rem;
     padding: 2px;
+}
+
+.cfp-date {
+    justify-content: flex-start;
+    width: 20%;
+    /* background-color: blue; */
 }
 
 .cfp-label {

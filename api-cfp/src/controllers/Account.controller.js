@@ -77,7 +77,7 @@ exports.getAccountPendingValueByMonth = async function (req, res) {
             } else {
                 // Para as contas de débito, apura pela entidade Payment
                 let pendingValue = await Payment.getPendingValueByAccountIdYearMonth(accountGranted.id, yearMonth);
-                res.status(200).send({ pendingValue });
+                res.status(200).send({ value: pendingValue });
             }
         })
         .catch(err => util.returnErr(err, res));
@@ -90,18 +90,25 @@ exports.getAccountPendingValueByMonth = async function (req, res) {
 async function getPendingValueByAccountIdYearMonth(accountId, yearMonth, transaction) {
     return Operation.findAll({
         attributes: [
-            [db.fn('SUM', db.col('shaOperation.value')), 'pendingValue']
+            [db.fn('SUM', db.col('shaOperation.value')), 'value']
         ],
         where: {
-            [Op.or]: [
-                { oprSourceAccountId: accountId },
-                { oprDestinyAccountId: accountId }
+            [Op.and]: [
+                {
+                    oprTypeId: { [Op.gt]: 6 }
+                },
+                {
+                    [Op.or]: [
+                        { oprSourceAccountId: accountId },
+                        { oprDestinyAccountId: accountId }
+                    ]
+                }
             ]
         },
         include: {
             model: Shall,
             as: 'shaOperation',
-            require: true,
+            required: true,
             attributes: [],
             where: {
                 [Op.and]: [
@@ -148,7 +155,7 @@ exports.getAccountPendingValue = async function (req, res) {
             } else {
                 // Para as contas de débito, apura pela entidade Payment
                 let pendingValue = await Payment.getPendingValueByAccountId(accountGranted.id);
-                res.status(200).send({ pendingValue });
+                res.status(200).send({ value: pendingValue });
             }
         })
         .catch(err => util.returnErr(err, res));
@@ -160,18 +167,25 @@ exports.getAccountPendingValue = async function (req, res) {
 async function getPendingValueByAccountId(accountId, transaction) {
     return Operation.findAll({
         attributes: [
-            [db.fn('SUM', db.col('shaOperation.value')), 'pendingValue']
+            [db.fn('SUM', db.col('shaOperation.value')), 'value']
         ],
         where: {
-            [Op.or]: [
-                { oprSourceAccountId: accountId },
-                { oprDestinyAccountId: accountId }
+            [Op.and]: [
+                {
+                    oprTypeId: { [Op.gt]: 6 }
+                },
+                {
+                    [Op.or]: [
+                        { oprSourceAccountId: accountId },
+                        { oprDestinyAccountId: accountId }
+                    ]
+                }
             ]
         },
         include: {
             model: Shall,
             as: 'shaOperation',
-            require: true,
+            required: true,
             attributes: [],
             where: { isPending: true },
             transaction
@@ -265,12 +279,10 @@ exports.listAccountByOwnerId = async function (req, res) {
         debug('AccessRule.isAuditor...')
         await Account.findByOwnerId(req.params.id)
             .then(accounts => {
-                debug('Accounts => ', accounts)
                 accounts = accounts.map(account => account.dataValues);
-                debug('Accounts Mapped => ', accounts)
                 res.status(200).send(accounts);
             })
-            .catch(err => returnErr(err, res))
+            .catch(err => util.returnErr(err, res))
     }
 
     else return returnErr({ status: 403, message: 'Acesso negado.' }, res);
@@ -414,22 +426,8 @@ function getBalanceByMonth(account, yearMonth) {
         'getBalanceByMonth() ======================= fim');
 
     return new Promise(async (resolve, reject) => {
-        // TO-DO: VerifyYearMonthInvalid
-        try {
-            // Verifica se o mês informado é válido
-            let month = parseInt(yearMonth.substring(yearMonth.length - 2, yearMonth.length))
-            debug('month string => ', yearMonth.substring(yearMonth.length - 2, yearMonth.length), '\n',
-                'month parseInt => ', month);
-            if (isNaN(month) || month < 1 || month > 12)
-                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
-            // Verifica se o ano informado é válido, acima de 1900
-            let year = parseInt(yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2))
-            debug('year string => ', yearMonth.substring(yearMonth.length - 6, yearMonth.length - 2), '\n',
-                'year parseInt => ', year);
-            if (isNaN(year) || year < 1900)
-                reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
-        } catch (err) {
-            reject(`Erro ao validar yearMonth=${yearMonth} ==> [${err}]`);
+        if (!util.isYearMonthValid(yearMonth)) {
+            reject(`Erro: Dados inválidos. yearMonth=${yearMonth}`);
         }
 
         await Balance.getBalanceByYearMonth(account.id, yearMonth)
