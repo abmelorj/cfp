@@ -1,4 +1,4 @@
-import { Operation } from './../models/operation.interface';
+import { Operation } from 'src/app/models/operation.interface';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -31,6 +31,15 @@ export class OperationService {
       default:
         return new Observable<Operation>();
     }
+  }
+
+  deleteOperation(operation: Operation): Observable<Operation> {
+    console.log('================= DELETE: ', operation);
+    return this.http.delete<Operation>(`${environment.api}/operations/${operation.id}`, { body: { version: operation.version } })
+  }
+
+  updateOperation(operation: Operation): Observable<Operation> {
+    return this.http.put<Operation>(`${environment.api}/operations/${operation.id}`, operation)
   }
 
   getOperationById(id: number): Observable<Operation> {

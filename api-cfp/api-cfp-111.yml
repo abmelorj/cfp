@@ -11,9 +11,9 @@ info:
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/abmelorj/api-cfp/1.1.0
+    url: https://virtserver.swaggerhub.com/abmelorj/api-cfp/1.1.1
   - description: Production Server (live data)
-    url: https://abmelo.com.br
+    url: https://abmelo.com.br/cfp/app
 
 externalDocs:
   description: Controle Financeiro Pessoal
@@ -165,7 +165,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccessGrant"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         405:
@@ -204,7 +204,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccessGrant"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -243,7 +243,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/AccessGrant"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -282,7 +282,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/AccessGrant"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -367,6 +367,9 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/UserToken"
 
+  # Não há necessidade deste método, pois a API é stateless e
+  # a desconexão ocorre por perda da validade do token ou ação
+  # na interface do usuário que elimina o token do local storage.
   /api/signout:
     post:
       security:
@@ -390,10 +393,11 @@ paths:
           description: "Usuário desconectado com sucesso."
           content: {}
         404:
-          description: "Erro: Não sessão ativa para ser deconectada."
+          description: "Erro: há Não sessão ativa para ser deconectada."
           content: {}
       requestBody:
         $ref: "#/components/requestBodies/UserToken"
+      deprecated: true
 
   # User --------------------------------------------------
   /api/users/{id}:
@@ -450,7 +454,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -512,7 +516,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Category"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         405:
@@ -541,7 +545,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Category"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -582,7 +586,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Category"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -614,11 +618,84 @@ paths:
         200:
           description: "MSG013: Exclusão de categoria efetuada com sucesso."
           content: {}
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
           description: "Erro: Categoria não identificada ou inválida"
+          content: {}
+
+  /api/categories/{id}/pendingValue:
+    get:
+      security:
+        - APIKeySecurityScheme: []
+      tags:
+        - categories
+      summary: Obtém valor do saldo comprometido
+      operationId: getCategoryPendingValue
+      parameters:
+        - name: id
+          in: path
+          description: ID da Categoria
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Saldo comprometido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        401:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Categoria não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/categories/{id}/pendingValue/{yearMonth}:
+    get:
+      security:
+        - APIKeySecurityScheme: []
+      tags:
+        - categories
+      summary: Obtém valor do saldo comprometido no mês
+      operationId: getCategoryPendingValueByMonth
+      parameters:
+        - name: id
+          in: path
+          description: ID da Categoria
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: yearMonth
+          in: path
+          description: Ano/Mês no formato AAAAMM de referência
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Saldo comprometido no mês
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        401:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Categoria não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
           content: {}
 
   /api/categories/owner/{id}:
@@ -646,7 +723,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Category"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -685,7 +762,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Account"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -714,7 +791,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         405:
@@ -743,7 +820,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -783,7 +860,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Account"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -815,7 +892,7 @@ paths:
         200:
           description: "MSG016: Exclusão de conta efetuada com sucesso."
           content: {}
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -853,7 +930,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Account"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -886,7 +963,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Value"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -926,7 +1003,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Value"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -968,7 +1045,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Operation"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -1003,7 +1080,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Value"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -1044,11 +1121,91 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Value"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
           description: "Erro: Conta não localizada."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/balances/{ownerId}/funds/{yearMonth}:
+    get:
+      security:
+        - APIKeySecurityScheme: []
+      tags:
+        - balances
+      summary: Recupera soma total do saldo no mês das contas de recurso financeiro do plano de contas do proprietário.
+      operationId: getMonthFundsByOwnerId
+      parameters:
+        - name: ownerId
+          in: path
+          description: ID do proprietário do CFP
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: yearMonth
+          in: path
+          description: Ano/Mês no formato AAAAMM de referência
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Saldo de recursos financeiros no mês
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        401:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Dados não localizados."
+          content: {}
+        500:
+          description: "Erro: Outros erros."
+          content: {}
+
+  /api/balances/{ownerId}/pendings/{yearMonth}:
+    get:
+      security:
+        - APIKeySecurityScheme: []
+      tags:
+        - shalls
+      summary: Recupera soma total das obrigações pendentes no mês no plano de contas do proprietário.
+      operationId: getMonthPendingsByOwnerId
+      parameters:
+        - name: ownerId
+          in: path
+          description: ID do proprietário do CFP
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: yearMonth
+          in: path
+          description: Ano/Mês no formato AAAAMM de referência
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: Total das obrigações pendentes no mês
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Value"
+        401:
+          description: "Acesso negado."
+          content: {}
+        404:
+          description: "Erro: Dados não localizados."
           content: {}
         500:
           description: "Erro: Outros erros."
@@ -1079,7 +1236,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Value"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -1121,7 +1278,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Value"
-        403:
+        401:
           description: "Acesso negado."
           content: {}
         404:
@@ -1238,6 +1395,32 @@ paths:
         $ref: "#/components/requestBodies/Operation"
 
   /api/operations/{id}:
+    get:
+      security:
+        - APIKeySecurityScheme: []
+      tags:
+        - operations
+      summary: Recupera dados de operação
+      operationId: getOperationById
+      parameters:
+        - name: id
+          in: path
+          description: ID da operação
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: "Operação registrada pelo usuário."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Operation"
+        404:
+          description: Operação não localizada
+          content: {}
+
     put:
       security:
         - APIKeySecurityScheme: []

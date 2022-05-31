@@ -16,6 +16,7 @@ import { ShallService } from 'src/app/services/shall.service';
   styleUrls: ['./shall-list.component.css']
 })
 export class ShallListComponent implements OnInit {
+  // lista as parcelas independente do mês selecionado.
 
   displayedColumns: string[] = ['oprDate', 'description', 'value', 'action'];
 
@@ -34,8 +35,7 @@ export class ShallListComponent implements OnInit {
     private shallService: ShallService,
     private route: ActivatedRoute,
   ) {
-    // Bloquear a alteração do mês selecionado no MonthComponent.
-    // TO-DO: lista as parcelas independente do mês selecionado.
+    // TO-DO: Bloquear a alteração do mês selecionado no MonthComponent.
 
     // Captura o Id da operação informada na rota.
     this.operationId = parseInt(route.snapshot.paramMap.get('id') || '0');

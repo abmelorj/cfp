@@ -1,13 +1,13 @@
 # TCC Pós-graduação Latu Sensu em Desenvolvimento Web Full Stack
 * ``Projeto:`` **Controle Financeiro Pessoal**
 * ``Autor..:`` **Anderson B. Melo**
-* ``Data...:`` 29/03/2022
+* ``Data...:`` 01/06/2022
 
 #
 # Artefatos
 ## API-CFP (API First)
 * [Documentação publicada no SwaggerHub - v1.1.0](https://app.swaggerhub.com/apis-docs/abmelorj/api-cfp/1.1.0)
-* [YAML api-cfp-110.yml](https://github.com/abmelorj/cfp/blob/main/api-cfp/api-cfp-110.yml)
+* [YAML api-cfp-111.yml](https://github.com/abmelorj/cfp/blob/main/api-cfp/api-cfp-111.yml)
 ## SPA-CFP (Singe Page Application em Angular)
 * Interface web da aplicação prevista para entrega do Módulo B
 ## Interface (Mobile First)

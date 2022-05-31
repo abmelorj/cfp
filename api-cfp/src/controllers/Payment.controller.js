@@ -30,27 +30,27 @@ exports.payupPayment = async function (req, res) {
         .then(async account => service.verifyAuditorAccessByAccount({ account, userId }))
         .then(async accountGranted => {
             if (!accountGranted)
-                return res.status(405).send({ message: `Erro ao localizar pagamento: [${paymentId}]` });
+                throw new Object({ status: 405, message: `Erro ao localizar pagamento: [${paymentId}]` });
 
             let payment = await Payment.findByPk(paymentId);
             // Verifica se pagamento está pendente de liquidação...
             if (!payment.isPending)
-                return util.returnErr({ status: 403, message: `O pagamento já estava liquidado.` }, res);
+                throw new Object({ status: 401, message: `O pagamento já estava liquidado.` });
 
             // Verifica versão do pagamento a ser liquidado...
             if (payment.version.getTime() !== paymentVersion.getTime())
-                return util.returnErr({ status: 403, message: `Não foi possível liquidar o pagamento porque o dado estava defasado. [${JSON.stringify(payment.version).replace(/\"/g, '')} <> ${JSON.stringify(paymentVersion).replace(/\"/g, '')}]` }, res);
+                throw new Object({ status: 401, message: `Não foi possível liquidar o pagamento porque o dado estava defasado. [${JSON.stringify(payment.version).replace(/\"/g, '')} <> ${JSON.stringify(paymentVersion).replace(/\"/g, '')}]` });
 
             // Inicio da transação...
             try {
                 await db.transaction(async transaction => {
                     await doPayup(paymentId, payDate, transaction)
                 });// Commit
+                // Fim da Transação!
+                return res.status(200).send({ message: 'Pagamento realizado!' });
             } catch (err) { // RollBack
                 return util.returnErr(err, res);
             };
-            // Fim da Transação!
-            return res.status(200).send({ message: 'Pagamento realizado!' });
         })
         .catch(err => util.returnErr(err, res));
 }
@@ -223,11 +223,11 @@ exports.updatePayment = async function (req, res) {
         .then(async () => service.verifyPaymentId(paymentId))
         .then(async payment => {
             if (!payment)
-                return res.status(404).send({ message: `Erro: Pagamento informado não foi localizado. [${paymentId}]` });
+                throw new Object({ status: 404, message: `Erro: Pagamento informado não foi localizado. [${paymentId}]` });
 
             // Verifica versão do pagamento a ser alterado...
             if (payment.version.getTime() !== paymentVersion.getTime())
-                return util.returnErr({ status: 404, message: `Não foi possível alterar o pagamento porque o dado estava defasado. [${JSON.stringify(payment.version).replace(/\"/g, '')} <> ${JSON.stringify(paymentVersion).replace(/\"/g, '')}]` }, res);
+                throw new Object({ status: 404, message: `Não foi possível alterar o pagamento porque o dado estava defasado. [${JSON.stringify(payment.version).replace(/\"/g, '')} <> ${JSON.stringify(paymentVersion).replace(/\"/g, '')}]` });
 
             // Inicio da transação...
             try {
@@ -418,17 +418,17 @@ exports.deletePayment = async function (req, res) {
                     // Recupera pagamento...
                     let payment = await Payment.findByPk(paymentId);
                     if (payment.version.getTime() !== paymentVersion.getTime())
-                        return util.returnErr({ status: 403, message: `Não foi possível excluir o registro do pagamento porque o dado estava defasado. [${JSON.stringify(payment.version).replace(/\"/g, '')} <> ${JSON.stringify(paymentVersion).replace(/\"/g, '')}]` }, res);
+                        throw new Object({ status: 401, message: `Não foi possível excluir o registro do pagamento porque o dado estava defasado. [${JSON.stringify(payment.version).replace(/\"/g, '')} <> ${JSON.stringify(paymentVersion).replace(/\"/g, '')}]` });
                     // - Excluir o pagamento (payment)
                     // - Reverter os saldos (balance)
                     // - Retornar as obrigações (shall) para pendente de pagamento
                     await Payment.delete(payment, transaction);
                 });// Commit
+                // Fim da Transação!
+                return res.status(200).send({ message: 'Pagamento excluído!' });
             } catch (err) { // RollBack
                 return util.returnErr(err, res);
             };
-            // Fim da Transação!
-            return res.status(200).send({ message: 'Pagamento excluído!' });
         })
         .catch(err => util.returnErr(err, res));
 }
@@ -470,16 +470,16 @@ exports.addPayment = async function (req, res) {
         .then(async () => isAccountIdValidAndEditorAcessGranted(payDebitAccountId, userId))
         .then(async accountGranted => {
             if (!accountGranted)
-                return res.status(405).send({ message: `Erro ao tentar registrar pagamento: [${shallId}]` });
+                throw new Object({ status: 405, message: `Erro ao tentar registrar pagamento: [${shallId}]` });
 
             // Verifica se está pendente de pagamento...
             let shall = await Shall.findByPk(shallId);
             if (!shall.isPending)
-                return util.returnErr({ status: 403, message: `A obrigação já estava liquidada.` }, res);
+                throw new Object({ status: 401, message: `A obrigação já estava liquidada.` });
 
             // Verifica versão da obrigação a ser paga...
             if (shall.version.getTime() !== shallVersion.getTime())
-                return util.returnErr({ status: 403, message: `Não foi possível registrar o pagamento porque o dado estava defasado. [${JSON.stringify(shall.version).replace(/\"/g, '')} <> ${JSON.stringify(shallVersion).replace(/\"/g, '')}]` }, res);
+                throw new Object({ status: 401, message: `Não foi possível registrar o pagamento porque o dado estava defasado. [${JSON.stringify(shall.version).replace(/\"/g, '')} <> ${JSON.stringify(shallVersion).replace(/\"/g, '')}]` });
 
             // Inicio da transação...
             try {
@@ -527,7 +527,7 @@ async function doPayment(shallId, payDebitAccountId, payDate, payValue, transact
                 payment.version = Date.now();
                 await payment.save({ transaction });
             } else {
-                reject({ status: 403, message: 'Obrigação já estava liquidada.' });
+                reject({ status: 401, message: 'Obrigação já estava liquidada.' });
             }
         } else {
             // Registrar o pagamento (liquidado)

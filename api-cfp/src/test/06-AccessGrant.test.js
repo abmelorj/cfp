@@ -86,7 +86,7 @@ it('Erro ao listar os acessos recebidos por um usuário inexistente', async () =
     // Antes de verificar se o usuário existe é verificado se quem solicita tem 
     // acesso mínimo de editor no CFP do usuário informado.
     // Como o usuário informado não existe, logo o usuário autenticado nem pode ter acesso ao CFP.
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(401);
 })
 
 it('1.4.3.4. Como proprietário do controle financeiro quero revogar acesso concedido a outro usuário para manter o acesso controlado.', async () => {

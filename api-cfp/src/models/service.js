@@ -229,9 +229,9 @@ exports.verifyOwnerAccessByAccount = function ({ account, userId }) {
                 if (AccessRule.isOwner(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
                     resolve(account)
                 else
-                    reject({ status: 403, message: 'Erro: Acesso negado.' });
+                    reject({ status: 401, message: 'Erro: Acesso negado.' });
             })
-            .catch(err => reject({ status: 403, message: `Erro: Acesso negado. [${err}]` }));
+            .catch(err => reject({ status: 401, message: `Erro: Acesso negado. [${err}]` }));
     })
 }
 
@@ -254,9 +254,9 @@ exports.verifyCoauthorAccessByAccount = function ({ account, userId }) {
                 if (AccessRule.isCoauthor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
                     resolve(account)
                 else
-                    reject({ status: 403, message: 'Erro: Acesso negado.' });
+                    reject({ status: 401, message: 'Erro: Acesso negado.' });
             })
-            .catch(err => reject({ status: 403, message: `Erro: Acesso negado. [${err}]` }));
+            .catch(err => reject({ status: 401, message: `Erro: Acesso negado. [${err}]` }));
     })
 }
 
@@ -279,9 +279,9 @@ exports.verifyEditorAccessByAccount = function ({ account, userId }) {
                 if (AccessRule.isEditor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
                     resolve(account)
                 else
-                    reject({ status: 403, message: 'Erro: Acesso negado.' });
+                    reject({ status: 401, message: 'Erro: Acesso negado.' });
             })
-            .catch(err => reject({ status: 403, message: `Erro: Acesso negado. [${err}]` }));
+            .catch(err => reject({ status: 401, message: `Erro: Acesso negado. [${err}]` }));
     })
 }
 
@@ -304,9 +304,9 @@ exports.verifyAuditorAccessByAccount = function ({ account, userId }) {
                 if (AccessRule.isAuditor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
                     resolve(account)
                 else
-                    reject({ status: 403, message: 'Erro: Acesso negado.' });
+                    reject({ status: 401, message: 'Erro: Acesso negado.' });
             })
-            .catch(err => reject({ status: 403, message: `Erro: Acesso negado. [${err}]` }));
+            .catch(err => reject({ status: 401, message: `Erro: Acesso negado. [${err}]` }));
     })
 }
 
@@ -329,9 +329,9 @@ exports.verifyAuditorAccessByCategoryId = function (categoryId, userId) {
                 if (AccessRule.isAuditor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
                     resolve(category)
                 else
-                    reject({ status: 403, message: 'Erro: Acesso negado.' });
+                    reject({ status: 401, message: 'Erro: Acesso negado.' });
             })
-            .catch(err => reject({ status: 403, message: `Erro: Acesso negado. [${err}]` }));
+            .catch(err => reject({ status: 401, message: `Erro: Acesso negado. [${err}]` }));
     })
 }
 

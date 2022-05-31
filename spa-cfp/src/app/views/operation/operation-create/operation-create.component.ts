@@ -137,7 +137,7 @@ export class OperationCreateComponent implements OnInit, OnDestroy {
       .subscribe(() => {
         this.cfpService.showMessage('Operação registrada!')
         // Navega para a lista de operações, selecionando a conta que estava visível
-        this.router.navigate([`/operation/list/${this.cfpService.account.id}`])
+        this.router.navigate([`/operation/list/${this.accountId}`])
       },
         err => this.cfpService.showMessage(err));
   }

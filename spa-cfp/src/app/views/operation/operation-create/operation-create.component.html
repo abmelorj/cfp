@@ -68,7 +68,7 @@
     <!-- ************************************************************************* -->
     <mat-form-field appearance="outline" class="form-field-full-width" *ngIf="operation.oprTypeId">
         <mat-label>Histórico/Descrição</mat-label>
-        <textarea cols="30" rows="5" matInput [placeholder]="hintDescriptionByOperationType(operation.oprTypeId || 0)"
+        <textarea cols="30" rows="3" matInput [placeholder]="hintDescriptionByOperationType(operation.oprTypeId || 0)"
             class="form-control" type="text" name="description" id="description" [(ngModel)]="operation.description"
             required></textarea>
     </mat-form-field>

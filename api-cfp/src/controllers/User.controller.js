@@ -36,7 +36,7 @@ exports.updateUserById = async function (req, res) {
 
     // O usuário só pode alterar o próprio cadastro
     if (req.decoded.id != req.params.id)
-        return sendErr({ status: 403, message: 'Acesso negado.' }, res);
+        return sendErr({ status: 401, message: 'Acesso negado.' }, res);
 
     // Procurar o usuário que será alterado
     await User.findByPk(req.params.id)

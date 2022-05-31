@@ -206,7 +206,7 @@ function verifyAccessAuditor({ category, userId }) {
             resolve(category)
         }
         else
-            reject({ status: 403, message: 'Acesso negado.' });
+            reject({ status: 401, message: 'Acesso negado.' });
     })
 }
 
@@ -277,7 +277,7 @@ exports.addCategory = async function (req, res) {
             .then(createIfNotExists)
             .then(newCategory => res.status(201).send(newCategory.dataValues))
             .catch(err => returnErr(err, res))
-    else return returnErr({ status: 403, message: 'Acesso negado.' }, res);
+    else return returnErr({ status: 401, message: 'Acesso negado.' }, res);
 }
 
 // Atualiza categoria
@@ -317,7 +317,7 @@ exports.updateCategory = async function (req, res) {
                 }
             })
             .catch(err => returnErr(err, res))
-    else return returnErr({ status: 403, message: 'Acesso negado.' }, res);
+    else return returnErr({ status: 401, message: 'Acesso negado.' }, res);
 }
 
 // Exclui categoria
@@ -339,7 +339,7 @@ exports.deleteCategory = async function (req, res) {
                         .then(() => res.status(200).send(loginfo('MSG013: Exclusão de categoria efetuada com sucesso.')))
                         .catch(err => returnErr(err, res))
                 else
-                    throw new Object({ status: 403, message: 'Acesso negado.' })
+                    throw new Object({ status: 401, message: 'Acesso negado.' })
             else
                 throw new Object({ status: 404, message: 'Erro: Categoria não identificada ou inválida' })
         })
@@ -359,7 +359,7 @@ exports.listCategoryByOwnerId = async function (req, res) {
             .then(findCategoriesByOwnerId)
             .then(categories => res.status(200).send(categories !== undefined ? categories : [{}]))
             .catch(err => returnErr(err, res))
-    else return returnErr({ status: 403, message: 'Acesso negado.' }, res);
+    else return returnErr({ status: 401, message: 'Acesso negado.' }, res);
 }
 
 
@@ -379,7 +379,7 @@ exports.getCategoryById = function (req, res) {
                 if (!category)
                     reject(returnErr({ status: 404, message: 'Erro: Categoria não localizada.' }, res));
                 if (!AccessRule.isAuditor(await AccessGrant.getUserProfileInOwnerCFP(req.decoded.id, category.catOwnerId)))
-                    reject(returnErr({ status: 403, message: 'Acesso negado.' }, res));
+                    reject(returnErr({ status: 401, message: 'Acesso negado.' }, res));
                 resolve(res.status(200).send(category.dataValues));
             })
             .catch(err => reject(returnErr({ status: 500, message: `Erro ao buscar categoria ==> [${err}]` }, res)));
@@ -402,7 +402,7 @@ exports.listAccountByCategoryId = function (req, res) {
                 if (!category)
                     reject(returnErr({ status: 404, message: 'Erro: Registro não localizado.' }, res));
                 if (!AccessRule.isAuditor(await AccessGrant.getUserProfileInOwnerCFP(req.decoded.id, category.catOwnerId)))
-                    reject(returnErr({ status: 403, message: 'Acesso negado.' }, res));
+                    reject(returnErr({ status: 401, message: 'Acesso negado.' }, res));
                 let accounts = []
                 accounts = await category.getAccCategory();
                 accounts = accounts.map(account => account.dataValues);

@@ -285,7 +285,7 @@ exports.listAccountByOwnerId = async function (req, res) {
             .catch(err => util.returnErr(err, res))
     }
 
-    else return returnErr({ status: 403, message: 'Acesso negado.' }, res);
+    else return returnErr({ status: 401, message: 'Acesso negado.' }, res);
 }
 
 
@@ -376,7 +376,7 @@ function verifyAccessAuditor({ account, userId }) {
                 if (AccessRule.isAuditor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
                     resolve(account)
                 else
-                    reject({ status: 403, message: 'Acesso negado.' });
+                    reject({ status: 401, message: 'Acesso negado.' });
             },
                 reason => reject(reason))
     })
@@ -554,7 +554,7 @@ function verifyAccessCoauthor({ account, userId }) {
                 if (AccessRule.isCoauthor(await AccessGrant.getUserProfileInOwnerCFP(userId, category.catOwnerId)))
                     resolve({ account, category })
                 else
-                    reject({ status: 403, message: 'Acesso negado.' });
+                    reject({ status: 401, message: 'Acesso negado.' });
             },
                 reason => reject(reason))
     })

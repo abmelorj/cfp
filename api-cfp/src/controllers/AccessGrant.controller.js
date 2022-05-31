@@ -92,7 +92,7 @@ exports.grantAccess = function (req, res) {
                 .then(newAccessGrant => resolve(res.status(201).send(newAccessGrant.dataValues)))
                 .catch(err => sendErr(err, res))
         else
-            return sendErr({ status: 403, message: 'Acesso negado.' }, res);
+            return sendErr({ status: 401, message: 'Acesso negado.' }, res);
     });
 }
 
@@ -113,7 +113,7 @@ exports.revokeAccess = function (req, res) {
                         grant.version = grant.version - (grant.version % 1000);
                         await grant.save()
                         return grant
-                    } else return sendErr({ status: 403, message: 'Acesso negado.' }, res);
+                    } else return sendErr({ status: 401, message: 'Acesso negado.' }, res);
                 })
                 .then(revokedGrant => resolve(res.status(200).send(revokedGrant.dataValues)))
                 .catch(err => sendErr(err, res));
@@ -135,7 +135,7 @@ exports.listAccessGrantedByOwnerId = async function (req, res) {
                 },
                     reason => sendErr({ status: 500, message: 'Erro: outros erros. '.concat(reason) }, res))
                 .catch(err => sendErr(err, res))
-        else return sendErr({ status: 403, message: 'Acesso negado.' }, res);
+        else return sendErr({ status: 401, message: 'Acesso negado.' }, res);
 }
 
 // Retorna array com a relação de acessos concedidos ao usuário identificado.
@@ -153,6 +153,6 @@ exports.listAccessGrantedByUserId = async function (req, res) {
                 },
                     reason => sendErr({ status: 500, message: 'Erro: outros erros. '.concat(reason) }, res))
                 .catch(err => sendErr(err, res));
-        else return sendErr({ status: 403, message: 'Acesso negado.' }, res);
+        else return sendErr({ status: 401, message: 'Acesso negado.' }, res);
 }
 

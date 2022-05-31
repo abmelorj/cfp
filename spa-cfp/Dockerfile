@@ -20,7 +20,8 @@ RUN ng update @angular/cdk @angular/core @angular/material
 RUN ng build
 
 FROM nginx:alpine AS spa-cfp
-COPY --from=spa-cfp-builder /spa-cfp/dist/spa-cfp/ /usr/share/nginx/html
+RUN mkdir -p /usr/share/nginx/html/cfp/app
+COPY --from=spa-cfp-builder /spa-cfp/dist/spa-cfp/ /usr/share/nginx/html/cfp/app
 COPY ./src/environments/abmelo.conf /etc/nginx/conf.d/default.conf
 RUN mkdir -p /etc/nginx/snippets
 COPY ./src/environments/ssl-params.conf /etc/nginx/snippets/ssl-params.conf

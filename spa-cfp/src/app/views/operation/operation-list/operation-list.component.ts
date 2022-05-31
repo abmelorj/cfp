@@ -85,6 +85,11 @@ export class OperationListComponent implements OnInit, DoCheck, OnDestroy {
     });
   }
 
+  allowEdit(oprTypeId: number, oprSourceAccountId?: number, oprDestinyAccountId?: number): boolean {
+    return ([1, 2].includes(oprTypeId) && oprDestinyAccountId == this.accountId) ||
+      ([3, 4, 5, 6, 7, 8].includes(oprTypeId) && oprSourceAccountId == this.accountId);
+  }
+
   strBrlDateToString(strBrlDate: string) {
     // Recebe: date
     // Retorna: string no formato de data no Brasil

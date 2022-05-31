@@ -29,11 +29,11 @@ exports.creditOperation = async function (req, res) {
                 await db.transaction(async transaction => {
                     await doCreditOrReserv(req, transaction);
                 }); // Commit
+                // Fim da Transação!
+                return res.status(201).send({ message: `Crédito de ${util.currency(req.body.value)} registrado na conta [${account.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
             } catch (err) { // RollBack
                 return util.returnErr(err, res)
             }
-            // Fim da Transação!
-            return res.status(201).send({ message: `Crédito de ${util.currency(req.body.value)} registrado na conta [${account.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
         })
         .catch(err => {
             util.returnErr(err, res)
@@ -70,11 +70,11 @@ exports.reservOperation = async function (req, res) {
                 await db.transaction(async transaction => {
                     await doCreditOrReserv(req, transaction);
                 }); // Commit
+                // Fim da Transação!
+                return res.status(200).send({ message: `Reserva de ${util.currency(req.body.value)} registrada na conta [${account.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
             } catch (err) { // RollBack               
                 return util.returnErr(err, res)
             }
-            // Fim da Transação!
-            return res.status(200).send({ message: `Reserva de ${util.currency(req.body.value)} registrada na conta [${account.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
         })
         .catch(err => util.returnErr(err, res))
 }
@@ -103,11 +103,11 @@ exports.transferOperation = async function (req, res) {
                 await db.transaction(async transaction => {
                     await doTransfer(req, transaction);
                 }); // Commit
+                // Fim da Transação!
+                return res.status(201).send({ message: `Realizada transferência de ${util.currency(req.body.value)} da conta [${accounts.sourceAccount.name}] para a conta [${accounts.destinyAccount.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
             } catch (err) { // RollBack               
                 return util.returnErr(err, res)
             }
-            // Fim da Transação!
-            return res.status(201).send({ message: `Realizada transferência de ${util.currency(req.body.value)} da conta [${accounts.sourceAccount.name}] para a conta [${accounts.destinyAccount.name}] em ${util.strBrlDateToString(req.body.oprDate)}.` });
         })
         .catch(err => util.returnErr(err, res))
 
@@ -153,13 +153,13 @@ exports.forecastOperation = async function (req, res) {
                 await db.transaction(async transaction => {
                     await doForecast(req, transaction);
                 }); // Commit
+                // Fim da Transação!
+                let qty = parseInt(req.body.qtyPayments);
+                let strDate = util.strBrlDateToString(req.body.startDate || req.body.oprDate);
+                return res.status(201).send({ message: `Realizada previsão de pagamento de ${util.currency(req.body.value)} usando a reserva financeira [${sourceAccount.name}] ${qty == 1 ? 'em' : 'a partir de'} ${strDate}${qty == 1 ? '' : ' dividido em ' + req.body.qtyPayments + ' parcelas mensais'}.` });
             } catch (err) { // RollBack               
                 return util.returnErr(err, res);
             }
-            // Fim da Transação!
-            let qty = parseInt(req.body.qtyPayments);
-            let strDate = util.strBrlDateToString(req.body.startDate || req.body.oprDate);
-            return res.status(201).send({ message: `Realizada previsão de pagamento de ${util.currency(req.body.value)} usando a reserva financeira [${sourceAccount.name}] ${qty == 1 ? 'em' : 'a partir de'} ${strDate}${qty == 1 ? '' : ' dividido em ' + req.body.qtyPayments + ' parcelas mensais'}.` });
         })
         .catch(err => util.returnErr(err, res))
 }
@@ -240,16 +240,15 @@ exports.payOperation = async function (req, res) {
                 await db.transaction(async transaction => {
                     await doPay(req, transaction);
                 }); // Commit
+                // Fim da Transação!
+                let qty = parseInt(req.body.qtyPayments || '1');
+                let strDate = util.strBrlDateToString(req.body.startDate || req.body.oprDate);
+                return res.status(201).send({
+                    message: `Realizado pagamento ${req.body.oprTypeId === 7 ? 'agendado ' : ''}de ${util.currency(req.body.value)} usando a reserva financeira [${accounts.sourceAccount.name}] com valor disponível em [${accounts.destinyAccount.name}] ${qty == 1 ? 'em' : 'a partir de'} ${strDate}${qty == 1 ? '' : ' dividido em ' + req.body.qtyPayments + ' parcelas mensais'}.`
+                });
             } catch (err) { // RollBack               
                 return util.returnErr(err, res);
             }
-
-            // Fim da Transação!
-            let qty = parseInt(req.body.qtyPayments || '1');
-            let strDate = util.strBrlDateToString(req.body.startDate || req.body.oprDate);
-            return res.status(201).send({
-                message: `Realizado pagamento ${req.body.oprTypeId === 7 ? 'agendado ' : ''}de ${util.currency(req.body.value)} usando a reserva financeira [${accounts.sourceAccount.name}] com valor disponível em [${accounts.destinyAccount.name}] ${qty == 1 ? 'em' : 'a partir de'} ${strDate}${qty == 1 ? '' : ' dividido em ' + req.body.qtyPayments + ' parcelas mensais'}.`
-            });
         })
         .catch(err => util.returnErr(err, res));
 }
@@ -428,17 +427,17 @@ exports.updateOperationById = async function (req, res) {
                     // Verifica versão da Operação a ser alterada...
                     let operation = await Operation.findByPk(operationId);
                     if (operation.version.getTime() !== operationVersion.getTime())
-                        return util.returnErr({ status: 403, message: `Não foi possível excluir o registro da operação porque o dado estava defasado. [${JSON.stringify(operation.version).replace(/\"/g, '')} <> ${JSON.stringify(operationVersion).replace(/\"/g, '')}]` }, res);
+                        throw new Object({ status: 401, message: `Não foi possível excluir o registro da operação porque o dado estava defasado. [${JSON.stringify(operation.version).replace(/\"/g, '')} <> ${JSON.stringify(operationVersion).replace(/\"/g, '')}]` });
                     // EXCLUIR a operação, eventuais obrigações e pagamentos (operation, shall, payment), e Reverter os saldos (balance)
                     await Operation.delete(operation, transaction);
                     // INCLUIR nova operação
                     await doNewOperation(req, transaction);
                 });// Commit
+                // Fim da Transação!
+                return res.status(200).send({ message: 'Operação alterada!' });
             } catch (err) { // RollBack
                 return util.returnErr(err, res);
             };
-            // Fim da Transação!
-            return res.status(200).send({ message: 'Operação alterada!' });
         })
         .catch(err => util.returnErr(err, res));
 
@@ -499,16 +498,16 @@ exports.deleteOperationById = async function (req, res) {
                     // Recupera Operação...
                     let operation = await Operation.findByPk(operationId);
                     if (operation.version.getTime() !== operationVersion.getTime())
-                        return util.returnErr({ status: 403, message: `Não foi possível excluir o registro da operação porque o dado estava defasado. [${JSON.stringify(operation.version).replace(/\"/g, '')} <> ${JSON.stringify(operationVersion).replace(/\"/g, '')}]` }, res);
+                        throw new Object({ status: 401, message: `Não foi possível excluir o registro da operação porque o dado estava defasado. [${JSON.stringify(operation.version).replace(/\"/g, '')} <> ${JSON.stringify(operationVersion).replace(/\"/g, '')}]` });
                     // - Excluir a operação, eventuais obrigações e pagamentos (operation, shall, payment)
                     // - Reverter os saldos (balance)
                     await Operation.delete(operation, transaction);
                 });// Commit
+                // Fim da Transação!
+                return res.status(200).send({ message: 'Operação excluída!' });
             } catch (err) { // RollBack
                 return util.returnErr(err, res);
             };
-            // Fim da Transação!
-            return res.status(200).send({ message: 'Operação excluída!' });
         })
         .catch(err => util.returnErr(err, res));
 
