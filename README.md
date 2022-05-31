@@ -6,7 +6,7 @@
 #
 # Artefatos
 ## API-CFP (API First)
-* [Documentação publicada no SwaggerHub - v1.1.0](https://app.swaggerhub.com/apis-docs/abmelorj/api-cfp/1.1.0)
+* [Documentação publicada no SwaggerHub - v1.1.1](https://app.swaggerhub.com/apis-docs/abmelorj/api-cfp/1.1.1)
 * [YAML api-cfp-111.yml](https://github.com/abmelorj/cfp/blob/main/api-cfp/api-cfp-111.yml)
 ## SPA-CFP (Singe Page Application em Angular)
 * Interface web da aplicação prevista para entrega do Módulo B
